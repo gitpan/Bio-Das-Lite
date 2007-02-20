@@ -1,0 +1,43 @@
+Bio-Das::Lite
+===========
+
+Bio::Das::Lite is an implementation of the BioDas protocol, http://biodas.org/
+for the retrieval of biological data from XML sources over HTTP.
+
+Bio::Das::Lite is designed as a lightweight and more forgiving alternative to
+the client/retrieval/parsing components of Bio::Das. Bio::Das::Lite itself is
+not a drop-in replacement for Bio::Das but it can be subclassed to do so
+(and probably will in a short-term future release).
+
+
+NOTE
+Results are returned hashed against the query URL which caused them.
+This means that sometimes you receive more results than you might expect
+(number of sources * number of segments)
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+LWP::Parallel::UserAgent
+SOAP::Lite is required for non-DAS/2 registry support
+
+COPYRIGHT AND LICENCE
+
+Copyright (c) 2007 by Roger Pettett, Genome Research Ltd.
+http://www.sanger.ac.uk/
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
