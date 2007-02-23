@@ -1,13 +1,13 @@
-package Bio::Das::Lite;
 #########
 # Author:        rmp@sanger.ac.uk
 # Maintainer:    rmp@sanger.ac.uk
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
+# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
 #
+package Bio::Das::Lite;
 use strict;
 use warnings;
 use Bio::Das::Lite::UserAgent;
@@ -18,10 +18,12 @@ use Carp;
 use English qw(-no_match_vars);
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.47 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.48 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 our $BLK_SIZE = 8192;
 our $TIMEOUT  = 5;
 our $MAX_REQ  = 5;
+our $LINKRE   = qr!<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>!mix;
+our $NOTERE   = qr!<note[^>]*>([^<]*)</note>!mix;
 
 #########
 # $ATTR contains information about document structure - tags, attributes and subparts
@@ -62,6 +64,12 @@ our $ATTR     = {
 				   },
 		 'sequence'     => {
 				    'sequence'     => [qw(id start stop moltype version)],
+				   },
+		 'dna'          => {
+				    'sequence'     => {
+						       'sequence' => [qw(id start stop version)],
+						       'dna'      => [qw(length)],
+						      },
 				   },
 		 'entry_points' => {
 				    'entry_points' => [qw(href version)],
@@ -258,6 +266,7 @@ our $OPTS = {
 	     'feature'      => [qw(segment type category categorize feature_id group_id)],
 	     'type'         => [qw(segment type)],
 	     'sequence'     => [qw(segment)],
+	     'dna'          => [qw(segment)],
 	     'entry_points' => [],
 	     'dsn'          => [],
 	     'stylesheet'   => [],
@@ -329,7 +338,7 @@ sub _get_set {
   my ($self, $key, $value) = @_;
   if(defined $value) {
     $self->{$key} = $value;
-#print STDERR qq(set self $key = @{[$value||'undef']}\n);
+#print {*STDERR} qq(set self $key = @{[$value||'undef']}\n);
   }
   return $self->{$key};
 }
@@ -432,6 +441,11 @@ sub sequence {
   return $self->_generic_request($query, 'sequence', $opts);
 }
 
+sub dna {
+  my ($self, $query, $opts) = @_;
+  return $self->_generic_request($query, 'dna', $opts);
+}
+
 sub alignment {
   my ($self, $opts) = @_;
   return $self->_generic_request($opts, 'alignment');
@@ -470,15 +484,38 @@ sub _generic_request {
   my ($self, $query, $fname, $opts) = @_;
   $opts       ||= {};
   delete $self->{'currentsegs'};
-  my $ref       = {};
-  my $dsn       = $opts->{'use_basename'}?$self->basename():$self->dsn();
-  my @bn        = @{$dsn};
   my $results   = {};
-  my @queries   = ();
   my $reqname   = $fname;
   $reqname      =~ s/[\(\)]//mxg;
   ($fname)      = $fname =~ /^([a-z_]+)/mx;
-  my $attr      = $ATTR->{$fname};
+
+  my $ref       = $self->build_requests($query, $fname, $reqname, $opts, $results);
+
+  $self->_fetch($ref, $opts->{'headers'});
+  $DEBUG and print {*STDERR} qq(Content retrieved\n);
+
+  $self->postprocess($fname, $results);
+
+  #########
+  # deal with caching
+  #
+  if($self->{'caching'}) {
+    $DEBUG and print {*STDERR} qq(Performing cache handling\n);
+    for my $s (keys %{$results}) {
+      if($DEBUG && !$results->{$s}) {
+	print {*STDERR} qq(CACHE HIT for $s\n);
+      }
+      $results->{$s}          ||= $self->{'_cache'}->{$s};
+      $self->{'_cache'}->{$s} ||= $results->{$s};
+    }
+  }
+
+  return $results;
+}
+
+sub build_queries {
+  my ($self, $query, $fname) = @_;
+  my @queries;
 
   if($query) {
     if(ref $query eq 'HASH') {
@@ -529,13 +566,41 @@ sub _generic_request {
     #
     push @queries, q();
   }
+  return \@queries;
+}
+
+sub _hack_fname {
+  my ($self, $fname) = @_;
+  #########
+  # Sucky hacks
+  #
+  if($fname eq 'structure') {
+    $fname = 'dasstructure';
+  } elsif($fname eq 'dna') {
+    $fname = 'sequence';
+  }
+  return $fname;
+}
+
+sub build_requests {
+  my ($self,
+      $query,
+      $fname,
+      $reqname,
+      $opts,
+      $results) = @_;
+
+  my $queries   = $self->build_queries($query, $fname);
+  my $attr      = $ATTR->{$fname};
+  my $dsn       = $opts->{'use_basename'}?$self->basename():$self->dsn();
+  my @bn        = @{$dsn};
+  my $ref       = {};
 
   for my $bn (@bn) {
     #########
     # loop over dsn basenames
     #
-
-    for my $request (map { "$bn/$reqname?$_" } @queries) {
+    for my $request (map { "$bn/$reqname?$_" } @{$queries}) {
       #########
       # and for each dsn, loop over the query request
       #
@@ -549,7 +614,6 @@ sub _generic_request {
       }
 
       $results->{$request} = [];
-
       $ref->{$request}     = sub {
 	my $data                     = shift;
 	$self->{'data'}->{$request} .= $data;
@@ -577,13 +641,13 @@ sub _generic_request {
 	  print {*STDERR} qq(invoking _parse_branch for $fname\n);
 	}
 
-	if($fname eq 'structure') {
-	  #########
-	  # Sucky hack because the structure response uses 'dasstructure' tags
-	  # Whoever did that needs a kicking
-	  #
-	  $fname = 'dasstructure';
+	#########
+	# Sucky hacks
+	#
+	if($fname eq 'dna') {
+	  $attr  = $attr->{'sequence'};
 	}
+	$fname = $self->_hack_fname($fname);
 
 	my $pat = qr!(<$fname.*?/$fname>|<$fname[^>]+/>)!smix;
 	while($self->{'data'}->{$request} =~ s/$pat//mx) {
@@ -598,13 +662,13 @@ sub _generic_request {
       };
     }
   }
+  return $ref;
+}
 
-  $self->_fetch($ref, $opts->{'headers'});
-  $DEBUG and print {*STDERR} qq(Content retrieved\n);
+sub postprocess {
+  my ($self, $fname, $results) = @_;
 
-  #########
-  # Postprocessing hacks
-  #
+  $fname = $self->_hack_fname($fname);
 
   #########
   # Add in useful segment information for empty segments
@@ -619,33 +683,35 @@ sub _generic_request {
   }
 
   #########
-  # minor tidy up for entry_points requests
+  # fix ups
   #
   if($fname eq 'entry_points') {
     $DEBUG and print {*STDERR} qq(Running postprocessing for entry_points\n);
+
     for my $s (keys %{$results}) {
       my $res = $results->{$s} || [];
       for my $r (@{$res}) {
 	delete $r->{'segment_id'};
       }
     }
-  }
 
-  #########
-  # deal with caching
-  #
-  if($self->{'caching'}) {
-    $DEBUG and print {*STDERR} qq(Performing cache handling\n);
+  } elsif($fname eq 'sequence') {
+    $DEBUG and print {*STDERR} qq(Running postprocessing for dna\n);
+
     for my $s (keys %{$results}) {
-      if($DEBUG && !$results->{$s}) {
-	print {*STDERR} qq(CACHE HIT for $s\n);
+      my $res = $results->{$s} || [];
+
+      for my $r (@{$res}) {
+	if(exists $r->{'dna'}) {
+	  $r->{'dna'} =~ s/\s+//smgx;
+
+	} elsif(exists $r->{'sequence'}) {
+	  $r->{'sequence'} =~ s/\s+//smgx;
+	}
       }
-      $results->{$s}          ||= $self->{'_cache'}->{$s};
-      $self->{'_cache'}->{$s} ||= $results->{$s};
     }
   }
-
-  return $results;
+  return;
 }
 
 #########
@@ -784,30 +850,7 @@ sub _parse_branch {
     }
   }
 
-  #########
-  # handle multiples of twig elements here
-  #
-  my $linkre = qr!<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>!mix;
-  my $notere = qr!<note[^>]*>([^<]*)</note>!mix;
-  $blk       =~ s!$linkre!{
-                           $ref->{'link'} ||= [];
-                           push @{$ref->{'link'}}, {
-                                                    'href' => $1,
-                                                    'txt'  => $2,
-                                                   };
-                           q()
-                          }!smegix;
-  $blk       =~ s!$notere!{
-                           $ref->{'note'} ||= [];
-                           push @{$ref->{'note'}}, $1;
-                           q()
-                          }!smegix;
-
-  if($addseginfo && $self->{'currentsegs'}->{$dsn}) {
-    while(my ($k, $v) = each %{$self->{'currentsegs'}->{$dsn}}) {
-      $ref->{$k} = $v;
-    }
-  }
+  $self->_parse_twig($dsn, $blk, $ref, $addseginfo);
 
   push @{$ar_ref}, $ref;
   $DEBUG and print {*STDERR} q( )x($depth*2), qq(leaving _parse_branch\n);
@@ -823,6 +866,34 @@ sub _parse_branch {
   }
 
   return q();
+}
+
+sub _parse_twig {
+  my ($self, $dsn, $blk, $ref, $addseginfo) = @_;
+
+  #########
+  # handle multiples of twig elements here
+  #
+  $blk =~ s!$LINKRE!{
+                     $ref->{'link'} ||= [];
+                     push @{$ref->{'link'}}, {
+                                              'href' => $1,
+                                              'txt'  => $2,
+                                             };
+                     q()
+                    }!smegix;
+  $blk =~ s!$NOTERE!{
+                     $ref->{'note'} ||= [];
+                     push @{$ref->{'note'}}, $1;
+                     q()
+                    }!smegix;
+
+  if($addseginfo && $self->{'currentsegs'}->{$dsn}) {
+    while(my ($k, $v) = each %{$self->{'currentsegs'}->{$dsn}}) {
+      $ref->{$k} = $v;
+    }
+  }
+  return;
 }
 
 sub registry {
@@ -842,11 +913,13 @@ sub registry_sources {
   my ($self, $filters, $flush) = @_;
 
   $filters       ||= {};
-  my $category     = $filters->{'category'}   ||[];
-  my $capability   = $filters->{'capability'} ||[];
+  my $category     = $filters->{'category'}   || [];
+  my $capability   = $filters->{'capability'} || [];
+
   if(!ref $category) {
     $category = [$category];
   }
+
   if(!ref $capability) {
     $capability = [$capability];
   }
@@ -858,9 +931,11 @@ sub registry_sources {
       $DEBUG and print {*STDERR} qq(Building soap request for $reg\n);
       my $soap = SOAP::Lite->service("$reg:das_directory?wsdl");
       $DEBUG and print {*STDERR} qq(Setting soap proxy\n);
+
       if($self->http_proxy()) {
 	$soap->proxy($reg, proxy => ['http'=>$self->http_proxy()]);
       }
+
       $DEBUG and print {*STDERR} qq(Running request for $reg\n);
 
       $SIG{ALRM} = sub { croak 'timeout'; };
@@ -879,7 +954,7 @@ sub registry_sources {
     return $self->{'_registry_sources'};
   }
 
-  my @sources = @{$self->{'_registry_sources'}};
+  my $sources = $self->{'_registry_sources'};
 
   #########
   # Apply capability filter
@@ -888,16 +963,7 @@ sub registry_sources {
      (scalar @{$capability})) {
     my $str    = join q(|), @{$capability};
     my $match  = qr/$str/;
-    my $filter = sub {
-      my ($src, $match) = @_;
-      for my $scap (@{$src->{'capabilities'}}) {
-	if($scap =~ $match) {
-	  return 1;
-	}
-      }
-      return 0;
-    };
-    @sources = grep { &{$filter}($_, $match) } @sources;
+    $sources = [grep { $self->_filter_capability($_, $match) } @{$sources}];
   }
 
   #########
@@ -905,19 +971,30 @@ sub registry_sources {
   #
   if((ref $category eq 'ARRAY') &&
      (scalar @{$category})) {
-    my $filter = sub {
-      my ($src, $match) = @_;
-      for my $scoord (@{$src->{'coordinateSystem'}}) {
-	for my $m (@{$match}) {
-	  return 1 if($scoord->{'category'} eq $m);
-	}
-      }
-      return 0;
-    };
-    @sources  = grep { &{$filter}($_, $category) } @sources;
+    $sources  = [grep { $self->_filter_category($_, $category) } @{$sources}];
   }
 
-  return \@sources;
+  return $sources;
+}
+
+sub _filter_capability {
+  my ($self, $src, $match) = @_;
+  for my $scap (@{$src->{'capabilities'}}) {
+    if($scap =~ $match) {
+      return 1;
+    }
+  }
+  return 0;
+};
+
+sub _filter_category {
+  my ($self, $src, $match) = @_;
+  for my $scoord (@{$src->{'coordinateSystem'}}) {
+    for my $m (@{$match}) {
+      return 1 if($scoord->{'category'} eq $m);
+    }
+  }
+  return 0;
 }
 
 1;
@@ -1159,6 +1236,18 @@ For a complete list of capabilities and categories, see:
     'category' => ['Protein Sequence'],
   });
 
+=head2 build_queries
+
+Constructs an arrayref of DAS requests including parameters for each call
+
+=head2 build_requests
+
+Constructs the LWP::P::UA callbacks
+
+=head2 postprocess
+
+Applies processing to the result set, e.g. removal of whitespace from sequence responses.
+
 =head1 DESCRIPTION
 
 This module is an implementation of a client for the DAS protocol (XML over HTTP primarily for biological-data).
@@ -1203,7 +1292,7 @@ Roger Pettett, E<lt>rmp@sanger.ac.ukE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2005 GRL, by Roger Pettett
+Copyright (C) 2007 GRL, by Roger Pettett
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.4 or,

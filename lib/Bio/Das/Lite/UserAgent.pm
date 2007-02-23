@@ -1,15 +1,19 @@
+#########
+# Author:        rmp@sanger.ac.uk
+# Maintainer:    rmp@sanger.ac.uk
+# Created:       2005-08-23
+# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
+# Source:        $Source $
+# Id:            $Id $
+# $HeadURL $
+#
 package Bio::Das::Lite::UserAgent;
 use strict;
 use warnings;
 use base qw(LWP::Parallel::UserAgent);
+use Bio::Das::Lite::UserAgent::proxy;
 
-our $VERSION  = do { my @r = (q$Revision: 1.1 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
-
-=head2 new : Constructor
-
-Call with whatever LWP::P::UA usually has
-
-=cut
+our $VERSION  = do { my @r = (q$Revision: 1.2 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 sub new {
   my ($class, %args) = @_;
@@ -22,7 +26,7 @@ sub new {
 sub _need_proxy {
   my $self = shift;
   $self->{'http_proxy'} or return;
-  my ($scheme, $host, $port) = $self->{'http_proxy'} =~ m|(https?)://([^:\#\?/]+):?(\d+)?|;
+  my ($scheme, $host, $port) = $self->{'http_proxy'} =~ m|(https?)://([^:\#\?/]+):?(\d+)?|mx;
   $host or return;
   my $proxy = {
 	       'host'   => $host,
@@ -33,9 +37,6 @@ sub _need_proxy {
   return $proxy;
 }
 
-=head2 on_failure : internal error propagation method
-
-=cut
 sub on_failure {
   my ($self, $request, $response, $entry)   = @_;
   $self->{'statuscodes'}                  ||= {};
@@ -43,16 +44,10 @@ sub on_failure {
   return;
 }
 
-=head2 on_return : internal error propagation method
-
-=cut
 sub on_return {
-  return &on_failure(@_);
+  return on_failure(@_);
 }
 
-=head2 statuscodes : helper for tracking response statuses keyed on url
-
-=cut
 sub statuscodes {
   my ($self, $url)         = @_;
   $self->{'statuscodes'} ||= {};
@@ -61,29 +56,56 @@ sub statuscodes {
 
 1;
 
-package Bio::Das::Lite::UserAgent::proxy;
-=head2 host : get/set host
+__END__
+
+=head1 NAME
+
+Bio::Das::Lite::UserAgent - A derivative of LWP::Parallel::UserAgent for Bio::Das::Lite use
+
+=head1 VERSION
+
+$Revision: 1.2 $
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+A subclass of LWP::Parallel::UserAgent supporting forward proxies
+
+=head1 SUBROUTINES/METHODS
+
+=head2 new : Constructor
+
+Call with whatever LWP::P::UA usually has
+
+=head2 on_failure : internal error propagation method
+
+=head2 on_return : internal error propagation method
+
+=head2 statuscodes : helper for tracking response statuses keyed on url
+
+=head1 DIAGNOSTICS
+
+=head1 CONFIGURATION AND ENVIRONMENT
+
+=head1 DEPENDENCIES
+
+LWP::Parallel::UserAgent
+
+=head1 INCOMPATIBILITIES
+
+=head1 BUGS AND LIMITATIONS
+
+=head1 AUTHOR
+
+Roger Pettett, E<lt>rmp@sanger.ac.ukE<gt>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (C) 2007 GRL, by Roger Pettett
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.4 or,
+at your option, any later version of Perl 5 you may have available.
 
 =cut
-sub host     { $_[0]->{'host'}; }
-
-=head2 port : get/set port
-
-=cut
-sub port     { $_[0]->{'port'}; }
-
-=head2 scheme : get/set scheme
-
-=cut
-sub scheme   { $_[0]->{'scheme'}; }
-
-#########
-# userinfo, presumably for authenticating to the proxy server.
-# Not sure what format this is supposed to be (username:password@ ?)
-# Things fail silently if this isn't present.
-#
-=head2 userinfo : stub for authentication? Stops LWP::P::UA from silently failing
-
-=cut
-sub userinfo { q(); }
-1;

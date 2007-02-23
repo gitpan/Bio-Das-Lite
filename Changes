@@ -1,5 +1,7 @@
 Revision history for Perl extension Bio::Das::Lite.
 
+1.48  'dna' request support. Minor refactorings and cleanups for perl-critic
+
 1.47  Reworked tests, a couple of fixes for structure handling
 
 1.44  Package namespace changed to Bio::Das::Lite

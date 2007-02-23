@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
-# Id:            $Id: 01-general.t,v 1.41 2007/02/20 14:31:54 rmp Exp $
+# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
+# Id:            $Id: 01-general.t,v 1.42 2007/02/23 00:18:19 rmp Exp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/01-general.t,v $
 # $HeadURL$
 #
@@ -11,7 +11,7 @@ use warnings;
 use Test::More tests => 7;
 use Bio::Das::Lite;
 
-our $VERSION = do { my @r = (q$Revision: 1.41 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.42 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 {
   my $das = Bio::Das::Lite->new();
@@ -47,6 +47,7 @@ our $VERSION = do { my @r = (q$Revision: 1.41 $ =~ /\d+/mxg); sprintf '%d.'.'%03
   ok(ref($f_by_id) eq 'HASH',      'feature-by-id returned a list');
 
   my $key      = (keys %{$f_by_id})[0];
+
   ok(scalar @{$f_by_id->{$key}} <= 1,      'feature-by=id returned one or no elements');
   ok(ref($f_by_id->{$key}->[0]) eq 'HASH', 'feature-by-id element was a hash');
 }

@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
-# Id:            $Id: 07-singledsn-multiseg.t,v 1.41 2007/02/20 14:31:54 rmp Exp $
+# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
+# Id:            $Id: 07-singledsn-multiseg.t,v 1.42 2007/02/23 00:18:19 rmp Exp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/07-singledsn-multiseg.t,v $
 # $HeadURL$
 #
@@ -11,9 +11,9 @@ use warnings;
 use Test::More tests => 10;
 use Bio::Das::Lite;
 
-our $VERSION = do { my @r = (q$Revision: 1.41 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.42 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
-my $src  = [qw(http://servlet.sanger.ac.uk/das/ensembl1834)];
+my $src  = [qw(http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference)];
 my $das  = Bio::Das::Lite->new({
 			      'dsn'     => $src,
 			      'timeout' => 30,
@@ -39,7 +39,7 @@ for my $call (qw(features sequence)) {
       ok(scalar @{$res->{$k}} > 0,      "$call returns some data");
 
     } else {
-      fail("Unexpected response code: $code");
+      fail("Unexpected response code: $code for $k");
     }
   }
 }
