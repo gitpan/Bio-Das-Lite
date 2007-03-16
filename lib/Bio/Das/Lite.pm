@@ -2,7 +2,7 @@
 # Author:        rmp@sanger.ac.uk
 # Maintainer:    rmp@sanger.ac.uk
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
+# Last Modified: $Date: 2007/03/16 10:01:29 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -18,7 +18,7 @@ use Carp;
 use English qw(-no_match_vars);
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.48 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.49 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 our $BLK_SIZE = 8192;
 our $TIMEOUT  = 5;
 our $MAX_REQ  = 5;
@@ -263,7 +263,7 @@ our $ATTR     = {
 # $OPTS contains information about parameters to use for queries
 #
 our $OPTS = {
-	     'feature'      => [qw(segment type category categorize feature_id group_id)],
+	     'feature'      => [qw(segment type category categorize feature_id group_id maxbins)],
 	     'type'         => [qw(segment type)],
 	     'sequence'     => [qw(segment)],
 	     'dna'          => [qw(segment)],

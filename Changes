@@ -1,5 +1,24 @@
 Revision history for Perl extension Bio::Das::Lite.
 
+1.49  new 'maxbins' parameter for feature requests:
+
+      In recent months more and more das sources appeared that provide
+      very condensed value based data. Sometimes it is a feature per
+      every 50 basepairs or even a feature per amino acid. It causes
+      two major problems:
+      1 - amount of XML being transferred is huge
+      2 - Ensembl can only do simple merge of the features, i.e just
+      pick max or min value - and in some cases das sources providers
+      want to use a completely different dataset for a different size
+      and resolution of the viewed region.
+
+      To solve these problems we have introduced a new `maxbins`
+      parameter to the `features` das request.  Using this parameter
+      Ensembl tells all das sources what is the width in pixels of the
+      image used to display the features.  Then the das sources smart
+      enough to understand the parameter will merge the features
+      themselves and for the rest Ensembl will do the work.
+
 1.48  'dna' request support. Minor refactorings and cleanups for perl-critic
 
 1.47  Reworked tests, a couple of fixes for structure handling
