@@ -1,8 +1,8 @@
 #########
-# Author:        rmp@sanger.ac.uk
-# Maintainer:    rmp@sanger.ac.uk
+# Author:        rpettett@cpan.org
+# Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
+# Last Modified: $Date: 2007/06/26 09:06:12 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -13,7 +13,7 @@ use warnings;
 use base qw(LWP::Parallel::UserAgent);
 use Bio::Das::Lite::UserAgent::proxy;
 
-our $VERSION  = do { my @r = (q$Revision: 1.2 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.3 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 sub new {
   my ($class, %args) = @_;
@@ -64,7 +64,7 @@ Bio::Das::Lite::UserAgent - A derivative of LWP::Parallel::UserAgent for Bio::Da
 
 =head1 VERSION
 
-$Revision: 1.2 $
+$Revision: 1.3 $
 
 =head1 SYNOPSIS
 
@@ -98,7 +98,7 @@ LWP::Parallel::UserAgent
 
 =head1 AUTHOR
 
-Roger Pettett, E<lt>rmp@sanger.ac.ukE<gt>
+Roger Pettett, E<lt>rpettett@cpan.orgE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 

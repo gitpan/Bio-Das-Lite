@@ -15,6 +15,7 @@ lib/Bio/Das/Lite/UserAgent/proxy.pm
 lib/Bio/DasLite.pm
 t/00-critic.t
 t/00-distribution.t
+t/00-pod.t
 t/01-compat-general.t
 t/01-general.t
 t/05-compat-singledsn.t
@@ -59,3 +60,4 @@ t/sequence.xml
 t/source.xml
 t/structure.xml
 t/types-ensembl1834.xml
+META.yml                                 Module meta-data (added by MakeMaker)

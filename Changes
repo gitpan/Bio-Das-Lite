@@ -1,5 +1,7 @@
 Revision history for Perl extension Bio::Das::Lite.
 
+1.50  added 'sequence' patch for alignments, patch from jt6
+
 1.49  new 'maxbins' parameter for feature requests:
 
       In recent months more and more das sources appeared that provide

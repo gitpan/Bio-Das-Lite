@@ -1,0 +1,19 @@
+--- #YAML:1.0
+name:                Bio-Das-Lite
+version:             1.051
+abstract:            Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.org/)
+license:             ~
+generated_by:        ExtUtils::MakeMaker version 6.32
+distribution_type:   module
+requires:     
+    Carp:                          1.02
+    English:                       1.01
+    HTTP::Headers:                 1.64
+    HTTP::Request:                 1.4
+    LWP::Parallel::UserAgent:      0
+    SOAP::Lite:                    0.69
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - Roger Pettett <rpettett@cpan.org>

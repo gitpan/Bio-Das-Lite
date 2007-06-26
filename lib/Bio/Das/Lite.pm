@@ -1,8 +1,8 @@
 #########
-# Author:        rmp@sanger.ac.uk
-# Maintainer:    rmp@sanger.ac.uk
+# Author:        rpettett@cpan.org
+# Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/03/16 10:01:29 $ $Author: rmp $
+# Last Modified: $Date: 2007/06/26 09:06:12 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -18,7 +18,7 @@ use Carp;
 use English qw(-no_match_vars);
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.49 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.51 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 our $BLK_SIZE = 8192;
 our $TIMEOUT  = 5;
 our $MAX_REQ  = 5;
@@ -101,6 +101,7 @@ our $ATTR     = {
 									       'alignobjectdetail' => [qw(dbSource
                                                                                                           property)],
 									      },
+						       'sequence'          => [],
 						      },
 				    'score'        => [qw(score)],
 				    'block'        => {
@@ -1288,7 +1289,7 @@ The DAS Registry at:
 
 =head1 AUTHOR
 
-Roger Pettett, E<lt>rmp@sanger.ac.ukE<gt>
+Roger Pettett, E<lt>rpettett@cpan.orgE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 

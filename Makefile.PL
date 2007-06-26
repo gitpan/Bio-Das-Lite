@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/03/16 13:34:39 $ $Author: rmp $
-# Id:            $Id: Makefile.PL,v 1.43 2007/03/16 13:34:39 rmp Exp $
+# Last Modified: $Date: 2007/06/26 09:06:12 $ $Author: rmp $
+# Id:            $Id: Makefile.PL,v 1.45 2007/06/26 09:06:12 rmp Exp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/Makefile.PL,v $
 # $HeadURL$
 #
@@ -12,11 +12,11 @@ use 5.005;
 use ExtUtils::MakeMaker;
 use English qw(-no_match_vars);
 
-our $VERSION = do { my @r = (q$Revision: 1.43 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.45 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 WriteMakefile(
 	      'NAME'          => 'Bio::Das::Lite',
-	      'AUTHOR'        => q(Roger M Pettett <rmp@sanger.ac.uk>),
+	      'AUTHOR'        => q(Roger Pettett <rpettett@cpan.org>),
 	      'ABSTRACT_FROM' => 'lib/Bio/Das/Lite.pm',
 	      'VERSION_FROM'  => 'lib/Bio/Das/Lite.pm',
 	      'DISTNAME'      => 'Bio-Das-Lite',
@@ -29,7 +29,6 @@ WriteMakefile(
 				  'Carp'                     => 1.02,
 				 },
 	      'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz', },
-	      'NO_META'       => 1,
 	     );
 
 print q(
