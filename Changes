@@ -1,5 +1,7 @@
 Revision history for Perl extension Bio::Das::Lite.
 
+1.52  kwalitee updates (Test::Pod::Coverage & LICENSE in Makefile.PL)
+
 1.50  added 'sequence' patch for alignments, patch from jt6
 
 1.49  new 'maxbins' parameter for feature requests:

@@ -2,7 +2,7 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/06/26 09:06:12 $ $Author: rmp $
+# Last Modified: $Date: 2007/07/20 12:55:03 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -18,7 +18,7 @@ use Carp;
 use English qw(-no_match_vars);
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.51 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.52 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 our $BLK_SIZE = 8192;
 our $TIMEOUT  = 5;
 our $MAX_REQ  = 5;
@@ -149,7 +149,7 @@ our $ATTR     = {
                                                                                      atomName
                                                                                      x y z)]
 								      },
-							  }, 
+							  },
 					      },
 				 'connect' => {
 					       'connect' => [qw(atomSerial type)],
@@ -161,12 +161,12 @@ our $ATTR     = {
 		 'sources' => {
 			       'source' => {
 					    'source'     => [qw(uri title doc_href description)],
-					    'maintainer' => { 
+					    'maintainer' => {
 							     'maintainer' => [qw(email)],
 							    },
 					    'version'    => {
-							     'version'     => [qw(uri created)], 
-							     'coordinates' => { 
+							     'version'     => [qw(uri created)],
+							     'coordinates' => {
 									       'coordinates' => [qw(uri
                                                                                                     source
                                                                                                     authority
@@ -190,69 +190,69 @@ our $ATTR     = {
 								    'type'  => [qw(id)],
 								    'glyph' => {
 										'arrow'          => {
-												     %COMMON_STYLE_ATTRS,
 												     'parallel'     => [],
 												     'bar_style'    => [], # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'anchored_arrow' => {
-												     %COMMON_STYLE_ATTRS,
 												     'parallel'     => [],
 												     'orientation'  => [], # WTSI extension
 												     'no_anchor'    => [], # WTSI extension
 												     'bar_style'    => [], # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'box'            => {
-												     %COMMON_STYLE_ATTRS,
 												     'linewidth'    => [],
 												     'pattern'      => [],  # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'farrow'         => {                      # WTSI extension
-												     %COMMON_STYLE_ATTRS,
 												     'orientation'  => [],
 												     'no_anchor'    => [],
 												     'bar_style'    => [], # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'rarrow'         => {                      # WTSI extension
-												     %COMMON_STYLE_ATTRS,
 												     'orientation'  => [],
 												     'no_anchor'    => [],
 												     'bar_style'    => [], # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'cross'          => {
-												     %COMMON_STYLE_ATTRS,
 												     'linewidth'    => [],  # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'dot'            => \%COMMON_STYLE_ATTRS,
 										'ex'             => {
-												     %COMMON_STYLE_ATTRS,
 												     'linewidth'    => [],  # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'hidden'         => \%COMMON_STYLE_ATTRS,
 										'line'           => {
-												     %COMMON_STYLE_ATTRS,
 												     'style'        => [],
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'span'           => {
-												     %COMMON_STYLE_ATTRS,
 												     'bar_style'    => [], # WTSI extension
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'text'           => {
-												     %COMMON_STYLE_ATTRS,
 												     'font'         => [],
 												     'fontsize'     => [],
 												     'string'       => [],
 												     'style'        => [],
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'primers'        => \%COMMON_STYLE_ATTRS,
 										'toomany'        => {
-												     %COMMON_STYLE_ATTRS,
 												     'linewidth'    => [],
+												     %COMMON_STYLE_ATTRS,
 												    },
 										'triangle'       => {
-												     %COMMON_STYLE_ATTRS,
 												     'linewidth'    => [],
 												     'direction'    => [],
 												     'orientation'  => [],
+												     %COMMON_STYLE_ATTRS,
 												    },
 									       },
 								   },

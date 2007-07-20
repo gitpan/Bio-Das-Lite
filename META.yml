@@ -1,8 +1,8 @@
 --- #YAML:1.0
 name:                Bio-Das-Lite
-version:             1.051
+version:             1.052
 abstract:            Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.org/)
-license:             ~
+license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.32
 distribution_type:   module
 requires:     
