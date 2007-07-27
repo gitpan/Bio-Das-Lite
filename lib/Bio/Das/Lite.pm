@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/07/20 12:55:03 $ $Author: rmp $
-# Source:        $Source $
-# Id:            $Id $
+# Last Modified: $Date: 2007/07/27 21:41:57 $ $Author: rmp $
+# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
+# Id:            $Id: Lite.pm,v 1.53 2007/07/27 21:41:57 rmp Exp $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -18,7 +18,7 @@ use Carp;
 use English qw(-no_match_vars);
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.52 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.53 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 our $BLK_SIZE = 8192;
 our $TIMEOUT  = 5;
 our $MAX_REQ  = 5;
