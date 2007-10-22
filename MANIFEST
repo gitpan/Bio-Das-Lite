@@ -10,7 +10,6 @@ lib/Bio/Das/Lite/UserAgent/proxy.pm
 lib/Bio/Das/Lite/UserAgent.pm
 lib/Bio/Das/Lite.pm
 lib/Bio/DasLite.pm
-Makefile.old
 Makefile.PL
 MANIFEST
 README

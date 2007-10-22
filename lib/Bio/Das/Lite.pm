@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/07/27 21:41:57 $ $Author: rmp $
+# Last Modified: $Date: 2007/10/22 08:35:07 $ $Author: rmp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm,v 1.53 2007/07/27 21:41:57 rmp Exp $
+# Id:            $Id: Lite.pm,v 1.54 2007/10/22 08:35:07 rmp Exp $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -18,7 +18,7 @@ use Carp;
 use English qw(-no_match_vars);
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.53 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.54 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 our $BLK_SIZE = 8192;
 our $TIMEOUT  = 5;
 our $MAX_REQ  = 5;
@@ -30,17 +30,18 @@ our $NOTERE   = qr!<note[^>]*>([^<]*)</note>!mix;
 # This is split up by call to reduce the number of tag passes for each response
 #
 our %COMMON_STYLE_ATTRS = (
-			   'yoffset'        => [], # WTSI extension (available in Ensembl)
-			   'scorecolormin'  => [], # WTSI extension
-			   'scorecolormax'  => [], # WTSI extension
-			   'scoreheightmin' => [], # WTSI extension
-			   'scoreheightmax' => [], # WTSI extension
-			   'zindex'         => [], # WTSI extension (available in Ensembl)
-			   'height'         => [],
-			   'fgcolor'        => [],
-			   'bgcolor'        => [],
-			   'label'          => [],
-			   'bump'           => [],
+			   yoffset        => [], # WTSI extension (available in Ensembl)
+			   scorecolormin  => [], # WTSI extension
+			   scorecolormax  => [], # WTSI extension
+			   scoreheightmin => [], # WTSI extension
+			   scoreheightmax => [], # WTSI extension
+			   zindex         => [], # WTSI extension (available in Ensembl)
+			   width          => [], # WTSI extension (available in Ensembl)
+			   height         => [],
+			   fgcolor        => [],
+			   bgcolor        => [],
+			   label          => [],
+			   bump           => [],
 			  );
 our $ATTR     = {
 		 '_segment'     => {
@@ -490,7 +491,13 @@ sub _generic_request {
   $reqname      =~ s/[\(\)]//mxg;
   ($fname)      = $fname =~ /^([a-z_]+)/mx;
 
-  my $ref       = $self->build_requests($query, $fname, $reqname, $opts, $results);
+  my $ref       = $self->build_requests({
+					 query   => $query,
+					 fname   => $fname,
+					 reqname => $reqname,
+					 opts    => $opts,
+					 results => $results
+					});
 
   $self->_fetch($ref, $opts->{'headers'});
   $DEBUG and print {*STDERR} qq(Content retrieved\n);
@@ -542,7 +549,7 @@ sub build_queries {
 	#########
 	# ... or if the first array arg is a hash, stitch the series of queries together
 	#
-	push @queries, map {
+	push @queries, map { ## no critic
 	  my $q = $_;
 	  join q(;), map { "$_=$q->{$_}" } grep { $q->{$_} } @{$OPTS->{$fname}};
 	} @{$query};
@@ -584,13 +591,12 @@ sub _hack_fname {
 }
 
 sub build_requests {
-  my ($self,
-      $query,
-      $fname,
-      $reqname,
-      $opts,
-      $results) = @_;
-
+  my ($self, $args) = @_;
+  my $query     = $args->{query};
+  my $fname     = $args->{fname};
+  my $reqname   = $args->{reqname};
+  my $opts      = $args->{opts};
+  my $results   = $args->{results};
   my $queries   = $self->build_queries($query, $fname);
   my $attr      = $ATTR->{$fname};
   my $dsn       = $opts->{'use_basename'}?$self->basename():$self->dsn();
@@ -628,12 +634,13 @@ sub build_requests {
 
 	  if($matches) {
 	    my $seginfo = [];
-	    _parse_branch($self,
-			  $request,
-			  $seginfo,
-			  $ATTR->{'_segment'},
-			  $1,
-			  0);
+	    $self->_parse_branch({
+				  request    => $request,
+				  seginfo    => $seginfo,
+				  attr       => $ATTR->{'_segment'},
+				  blk        => $1,
+				  addseginfo => 0,
+				 });
 	    $self->{'currentsegs'}->{$request} = $seginfo->[0];
 	  }
 	}
@@ -652,7 +659,13 @@ sub build_requests {
 
 	my $pat = qr!(<$fname.*?/$fname>|<$fname[^>]+/>)!smix;
 	while($self->{'data'}->{$request} =~ s/$pat//mx) {
-	  _parse_branch($self, $request, $results->{$request}, $attr, $1, 1);
+	  $self->_parse_branch({
+				request    => $request,
+				seginfo    => $results->{$request},
+				attr       => $attr,
+				blk        => $1,
+				addseginfo => 1,
+			       });
 	}
 
 	if($DEBUG) {
@@ -791,9 +804,14 @@ sub statuscodes {
 # recursively parse the XML blocks and build the corresponding response data structure
 #
 sub _parse_branch {
-  my ($self, $dsn, $ar_ref, $attr, $blk, $addseginfo, $depth) = @_;
-  $depth ||= 0;
-  my $ref  = {};
+  my ($self, $args) = @_;
+  my $dsn           = $args->{request};
+  my $ar_ref        = $args->{seginfo};
+  my $attr          = $args->{attr};
+  my $blk           = $args->{blk};
+  my $addseginfo    = $args->{addseginfo};
+  my $depth         = $args->{depth} || 0;
+  my $ref           = {};
 
   my (@parts, @subparts);
   while(my ($k, $v) = each %{$attr}) {
@@ -812,7 +830,14 @@ sub _parse_branch {
 
     my $pat = qr!(<$subpart[^>]*/>|<$subpart[^>]*?(?\!/)>.*?/$subpart>)!smix;
     while($blk =~ s/$pat//mx) {
-      _parse_branch($self, $dsn, $subpart_ref, $attr->{$subpart}, $1, 0, $depth+1);
+      $self->_parse_branch({
+			    request    => $dsn,
+			    seginfo    => $subpart_ref,
+			    attr       => $attr->{$subpart},
+			    blk        => $1,
+			    addseginfo => 0,
+			    depth      => $depth+1,
+			   });
     }
 
     if(scalar @{$subpart_ref}) {

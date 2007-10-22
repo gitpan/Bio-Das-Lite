@@ -2,7 +2,7 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/06/26 09:06:12 $ $Author: rmp $
+# Last Modified: $Date: 2007/10/22 08:35:07 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -13,7 +13,7 @@ use warnings;
 use base qw(LWP::Parallel::UserAgent);
 use Bio::Das::Lite::UserAgent::proxy;
 
-our $VERSION  = do { my @r = (q$Revision: 1.3 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.4 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 sub new {
   my ($class, %args) = @_;
@@ -45,7 +45,8 @@ sub on_failure {
 }
 
 sub on_return {
-  return on_failure(@_);
+  my @args = @_;
+  return on_failure(@args);
 }
 
 sub statuscodes {
@@ -64,7 +65,7 @@ Bio::Das::Lite::UserAgent - A derivative of LWP::Parallel::UserAgent for Bio::Da
 
 =head1 VERSION
 
-$Revision: 1.3 $
+$Revision: 1.4 $
 
 =head1 SYNOPSIS
 

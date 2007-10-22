@@ -2,7 +2,7 @@
 # Author:        rmp@sanger.ac.uk
 # Maintainer:    rmp@sanger.ac.uk
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
+# Last Modified: $Date: 2007/10/22 08:35:07 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -11,11 +11,11 @@ package Bio::Das::Lite::UserAgent::proxy;
 use strict;
 use warnings;
 
-our $VERSION  = do { my @r = (q$Revision: 1.1 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.2 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
-sub host     { return $_[0]->{'host'}; }
-sub port     { return $_[0]->{'port'}; }
-sub scheme   { return $_[0]->{'scheme'}; }
+sub host     { my $self = shift; return $self->{'host'}; }
+sub port     { my $self = shift; return $self->{'port'}; }
+sub scheme   { my $self = shift; return $self->{'scheme'}; }
 
 #########
 # userinfo, presumably for authenticating to the proxy server.
@@ -33,7 +33,7 @@ Bio::Das::Lite::UserAgent::proxy - A derivative of LWP::Parallel::UserAgent for 
 
 =head1 VERSION
 
-$Revision: 1.1 $
+$Revision: 1.2 $
 
 =head1 SYNOPSIS
 
