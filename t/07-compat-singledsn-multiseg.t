@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
-# Id:            $Id: 07-compat-singledsn-multiseg.t,v 1.2 2007/02/20 14:31:54 rmp Exp $
+# Last Modified: $Date: 2008/07/29 09:51:13 $ $Author: aj5 $
+# Id:            $Id: 07-compat-singledsn-multiseg.t,v 1.3 2008/07/29 09:51:13 aj5 Exp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/07-compat-singledsn-multiseg.t,v $
 # $HeadURL$
 #
@@ -11,9 +11,9 @@ use warnings;
 use Test::More tests => 10;
 use Bio::DasLite;
 
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
-my $src  = [qw(http://servlet.sanger.ac.uk/das/ensembl1834)];
+my $src  = [qw(http://www.ensembl.org/das/Homo_sapiens.NCBI36.reference)];
 my $das  = Bio::DasLite->new({
 			      'dsn'     => $src,
 			      'timeout' => 30,

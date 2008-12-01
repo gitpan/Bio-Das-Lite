@@ -6,7 +6,6 @@ eg/new_from_registry
 eg/regtest
 eg/stylesheet_test
 eg/uniprot-test
-lib/Bio/Das/Lite/UserAgent/proxy.pm
 lib/Bio/Das/Lite/UserAgent.pm
 lib/Bio/Das/Lite.pm
 lib/Bio/DasLite.pm

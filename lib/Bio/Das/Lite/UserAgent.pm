@@ -2,7 +2,7 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/10/22 08:35:07 $ $Author: rmp $
+# Last Modified: $Date: 2008/12/01 16:59:40 $ $Author: rmp $
 # Source:        $Source $
 # Id:            $Id $
 # $HeadURL $
@@ -11,37 +11,40 @@ package Bio::Das::Lite::UserAgent;
 use strict;
 use warnings;
 use base qw(LWP::Parallel::UserAgent);
-use Bio::Das::Lite::UserAgent::proxy;
+use Readonly;
+our $VERSION  = do { my @r = (q$Revision: 1.8 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
-our $VERSION  = do { my @r = (q$Revision: 1.4 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+Readonly::Scalar our $STATUS_TEXT => {
+				      200 => '200 OK',
+				      400 => '400 Bad command (command not recognized)',
+				      401 => '401 Bad data source (data source unknown)',
+				      402 => '402 Bad command arguments (arguments invalid)',
+				      403 => '403 Bad reference object',
+				      404 => '404 Requested object unknown',
+				      405 => '405 Coordinate error',
+				      500 => '500 Server error',
+				      501 => '501 Unimplemented feature',
+				     };
 
 sub new {
   my ($class, %args) = @_;
   my $self = LWP::Parallel::UserAgent->new(%args);
   bless $self, $class;
-  $self->{'http_proxy'} = $args{'http_proxy'}; # || $ENV{'http_proxy'};
   return $self;
 }
 
-sub _need_proxy {
-  my $self = shift;
-  $self->{'http_proxy'} or return;
-  my ($scheme, $host, $port) = $self->{'http_proxy'} =~ m|(https?)://([^:\#\?/]+):?(\d+)?|mx;
-  $host or return;
-  my $proxy = {
-	       'host'   => $host,
-	       'port'   => $port   || '3128',
-	       'scheme' => $scheme || 'http',
-	      };
-  bless $proxy, 'Bio::Das::Lite::UserAgent::proxy';
-  return $proxy;
-}
-
 sub on_failure {
-  my ($self, $request, $response, $entry)   = @_;
-  $self->{'statuscodes'}                  ||= {};
-  $self->{'statuscodes'}->{$request->url()} = $response->status_line();
-  return;
+  my ($self, $request, $response, $entry) = @_;
+  $self->{statuscodes}                  ||= {};
+
+  if (my $das_status = $response->header('X-DAS-Status')) {
+    $self->{statuscodes}->{$request->url()} = $STATUS_TEXT->{ $das_status } || $das_status;
+
+  } else {
+    $self->{statuscodes}->{$request->url()} = $response->status_line();
+  }
+
+  return 1;
 }
 
 sub on_return {
@@ -50,9 +53,10 @@ sub on_return {
 }
 
 sub statuscodes {
-  my ($self, $url)         = @_;
-  $self->{'statuscodes'} ||= {};
-  return $url?$self->{'statuscodes'}->{$url}:$self->{'statuscodes'};
+  my ($self, $url)       = @_;
+  $self->{statuscodes} ||= {};
+
+  return $url?$self->{statuscodes}->{$url}:$self->{statuscodes};
 }
 
 1;
@@ -65,7 +69,7 @@ Bio::Das::Lite::UserAgent - A derivative of LWP::Parallel::UserAgent for Bio::Da
 
 =head1 VERSION
 
-$Revision: 1.4 $
+$Revision: 1.8 $
 
 =head1 SYNOPSIS
 

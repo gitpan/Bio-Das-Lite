@@ -1,16 +1,25 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Bio-Das-Lite
-version:      1.054
-version_from: lib/Bio/Das/Lite.pm
-installdirs:  site
+--- #YAML:1.0
+name:               Bio-Das-Lite
+version:            1.060
+abstract:           Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.org/)
+author:
+    - Roger Pettett <rpettett@cpan.org>
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
 requires:
-    Carp:                          1.02
-    English:                       1.01
-    HTTP::Headers:                 1.64
-    HTTP::Request:                 1.4
-    LWP::Parallel::UserAgent:      0
-    SOAP::Lite:                    0.69
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+    Carp:                 1.02
+    English:              1.01
+    HTTP::Headers:        1.64
+    HTTP::Request:        1.4
+    LWP::Parallel::UserAgent:  0
+    SOAP::Lite:           0.69
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.46
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

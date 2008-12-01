@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2007/10/22 08:35:07 $ $Author: rmp $
+# Last Modified: $Date: 2008/12/01 16:59:40 $ $Author: rmp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm,v 1.54 2007/10/22 08:35:07 rmp Exp $
+# Id:            $Id: Lite.pm,v 1.60 2008/12/01 16:59:40 rmp Exp $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -16,14 +16,23 @@ use HTTP::Headers;
 use SOAP::Lite;
 use Carp;
 use English qw(-no_match_vars);
+use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.54 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
-our $BLK_SIZE = 8192;
-our $TIMEOUT  = 5;
-our $MAX_REQ  = 5;
-our $LINKRE   = qr!<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>!mix;
-our $NOTERE   = qr!<note[^>]*>([^<]*)</note>!mix;
+our $VERSION  = do { my @r = (q$Revision: 1.60 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+Readonly::Scalar our $BLK_SIZE => 8192;
+Readonly::Scalar our $TIMEOUT  => 5;
+Readonly::Scalar our $MAX_REQ  => 5;
+Readonly::Scalar our $MAX_HOST => 7;
+Readonly::Scalar our $LINKRE   => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>}mix;
+Readonly::Scalar our $NOTERE   => qr{<note[^>]*>([^<]*)</note>}mix;
+
+BEGIN {
+  if(!LWP::Protocol->can('parse_head')) {
+    require LWP::Protocol;
+    *LWP::Protocol::parse_head = sub { shift->_elem('parse_head', @_); };
+  }
+}
 
 #########
 # $ATTR contains information about document structure - tags, attributes and subparts
@@ -42,6 +51,15 @@ our %COMMON_STYLE_ATTRS = (
 			   bgcolor        => [],
 			   label          => [],
 			   bump           => [],
+			  );
+our %SCORED_STYLE_ATTRS = (
+			   min            => [],
+			   max            => [],
+			   steps          => [],
+			   color1         => [],
+			   color2         => [],
+			   color3         => [],
+			   height         => [],
 			  );
 our $ATTR     = {
 		 '_segment'     => {
@@ -97,7 +115,7 @@ our $ATTR     = {
                                                                                   dbSource
                                                                                   dbVersion
                                                                                   dbAccessionId
-                                                                                  dbCoodSys)],
+                                                                                  dbCoordSys)],
 						       'alignobjectdetail' => {
 									       'alignobjectdetail' => [qw(dbSource
                                                                                                           property)],
@@ -171,6 +189,7 @@ our $ATTR     = {
 									       'coordinates' => [qw(uri
                                                                                                     source
                                                                                                     authority
+                                                                                                    taxid
                                                                                                     test_range
                                                                                                     version)],
 									      },
@@ -190,6 +209,7 @@ our $ATTR     = {
 						     'type'     => {
 								    'type'  => [qw(id)],
 								    'glyph' => {
+                                                                                'glyph'          => [qw(zoom)],
 										'arrow'          => {
 												     'parallel'     => [],
 												     'bar_style'    => [], # WTSI extension
@@ -255,6 +275,18 @@ our $ATTR     = {
 												     'orientation'  => [],
 												     %COMMON_STYLE_ATTRS,
 												    },
+										'gradient'       => {
+												     %SCORED_STYLE_ATTRS,
+												    },
+										'histogram'      => {
+												     %SCORED_STYLE_ATTRS,
+												    },
+										'tiling'         => {
+												     %SCORED_STYLE_ATTRS,
+												    },
+										'lineplot'       => {
+												     %SCORED_STYLE_ATTRS,
+												    },
 									       },
 								   },
 						    },
@@ -292,7 +324,7 @@ sub new {
 
   if($ref && ref $ref) {
     for my $arg (qw(dsn timeout caching callback registry user_agent
-                    http_proxy proxy_user proxy_pass)) {
+                    http_proxy proxy_user proxy_pass no_proxy)) {
       if(exists $ref->{$arg} && $self->can($arg)) {
 	$self->$arg($ref->{$arg});
       }
@@ -312,6 +344,7 @@ sub new_from_registry {
   return $self;
 }
 
+# We implement this method because LWP does not parse user/password
 sub http_proxy {
   my ($self, $proxy) = @_;
   if($proxy) {
@@ -323,7 +356,7 @@ sub http_proxy {
     $self->{'_checked_http_proxy_env'} = 1;
   }
 
-  if($self->{'http_proxy'} =~ m|^(https?://)(\S+):(.*?)\@(.*?)$|mx) {
+  if($self->{'http_proxy'} =~ m{^(https?://)(\S+):(.*?)\@(.*?)$}mx) {
     #########
     # http_proxy contains username & password - we'll set them up here:
     #
@@ -336,11 +369,29 @@ sub http_proxy {
   return $self->{'http_proxy'};
 }
 
+sub no_proxy {
+  my ($self, @args) = @_;
+
+  if (scalar @args) {
+    if ($args[0] && ref $args[0] && ref $args[0] eq 'ARRAY') {
+      $self->{'no_proxy'} = $args[0];
+    } else {
+      $self->{'no_proxy'} = \@args;
+    }
+  }
+
+  if(!$self->{'_checked_no_proxy_env'}) {
+    $self->{'no_proxy'} ||= [split /\s*,\s*/mx, $ENV{'no_proxy'} || q()];
+    $self->{'_checked_no_proxy_env'} = 1;
+  }
+
+  return $self->{'no_proxy'} || [];
+}
+
 sub _get_set {
   my ($self, $key, $value) = @_;
   if(defined $value) {
     $self->{$key} = $value;
-#print {*STDERR} qq(set self $key = @{[$value||'undef']}\n);
   }
   return $self->{$key};
 }
@@ -370,6 +421,11 @@ sub caching {
   return $self->_get_set('caching', $val);
 }
 
+sub max_hosts {
+  my ($self, $val) = @_;
+  return $self->_get_set('_max_hosts', $val);
+}
+
 sub max_req {
   my ($self, $val) = @_;
   return $self->_get_set('_max_req', $val);
@@ -387,7 +443,7 @@ sub basename {
   my @res          = ();
 
   for my $service (@dsns) {
-    $service =~ m|(https?://.*/das)/?|mx;
+    $service =~ m{(https?://.*/das)/?}mx;
     if($1) {
       push @res, $1;
     }
@@ -511,7 +567,7 @@ sub _generic_request {
     $DEBUG and print {*STDERR} qq(Performing cache handling\n);
     for my $s (keys %{$results}) {
       if($DEBUG && !$results->{$s}) {
-	print {*STDERR} qq(CACHE HIT for $s\n);
+	print {*STDERR} qq(CACHE HIT for $s\n); ## no critic (InputOutput::RequireCheckedSyscalls)
       }
       $results->{$s}          ||= $self->{'_cache'}->{$s};
       $self->{'_cache'}->{$s} ||= $results->{$s};
@@ -630,7 +686,7 @@ sub build_requests {
 	  # If we haven't yet found segment information for this request
 	  # Then look for some. This one is a non-destructive scan.
 	  #
-	  my $matches = $self->{'data'}->{$request}  =~ m!(<segment[^>]*>)!mix;
+	  my $matches = $self->{'data'}->{$request}  =~ m{(<segment[^>]*>)}mix;
 
 	  if($matches) {
 	    my $seginfo = [];
@@ -646,7 +702,7 @@ sub build_requests {
 	}
 
 	if($DEBUG) {
-	  print {*STDERR} qq(invoking _parse_branch for $fname\n);
+	  print {*STDERR} qq(invoking _parse_branch for $fname\n); ## no critic (InputOutput::RequireCheckedSyscalls)
 	}
 
 	#########
@@ -657,7 +713,7 @@ sub build_requests {
 	}
 	$fname = $self->_hack_fname($fname);
 
-	my $pat = qr!(<$fname.*?/$fname>|<$fname[^>]+/>)!smix;
+	my $pat = qr{(<$fname.*?/$fname>|<$fname[^>]+/>)}smix;
 	while($self->{'data'}->{$request} =~ s/$pat//mx) {
 	  $self->_parse_branch({
 				request    => $request,
@@ -669,7 +725,7 @@ sub build_requests {
 	}
 
 	if($DEBUG) {
-	  print {*STDERR} qq(completed _parse_branch\n);
+	  print {*STDERR} qq(completed _parse_branch\n); ## no critic (InputOutput::RequireCheckedSyscalls)
 	}
 
 	return;
@@ -730,15 +786,20 @@ sub postprocess {
 
 #########
 # Set up the parallel HTTP fetching
-# This uses our LWP::Parallel::UserAgent subclass which has better proxy handling
+# This uses our LWP::Parallel::UserAgent subclass which handles DAS statuses
 #
 sub _fetch {
   my ($self, $url_ref, $headers) = @_;
-  $self->{'ua'}                ||= Bio::Das::Lite::UserAgent->new(
-								'http_proxy' => $self->http_proxy(),
-							       );
+
+  if (!$self->{'ua'}) {
+    $self->{'ua'} = Bio::Das::Lite::UserAgent->new();
+    $self->{'ua'}->proxy( ['http','https'], $self->http_proxy() );
+    $self->{'ua'}->no_proxy( @{ $self->no_proxy() } );
+  }
+
   $self->{'ua'}->initialize();
-  $self->{'ua'}->max_req($self->max_req()||$MAX_REQ);
+  $self->{'ua'}->max_req  ($self->max_req()   || $MAX_REQ );
+  $self->{'ua'}->max_hosts($self->max_hosts() || $MAX_HOST);
   $self->{'statuscodes'}          = {};
   $headers                      ||= {};
   $headers->{'X-Forwarded-For'} ||= $ENV{'HTTP_X_FORWARDED_FOR'};
@@ -767,11 +828,10 @@ sub _fetch {
   $DEBUG and print {*STDERR} qq(Requests submitted. Waiting for content\n);
   eval {
     $self->{'ua'}->wait($self->{'timeout'});
-  };
 
-  if($EVAL_ERROR) {
+  } or do {
     carp $EVAL_ERROR;
-  }
+  };
 
   for my $url (keys %{$url_ref}) {
     if(ref $url_ref->{$url} ne 'CODE') {
@@ -828,7 +888,7 @@ sub _parse_branch {
   for my $subpart (@subparts) {
     my $subpart_ref  = [];
 
-    my $pat = qr!(<$subpart[^>]*/>|<$subpart[^>]*?(?\!/)>.*?/$subpart>)!smix;
+    my $pat = qr{(<$subpart[^>]*/>|<$subpart[^>]*?(?!/)>.*?/$subpart>)}smix;
     while($blk =~ s/$pat//mx) {
       $self->_parse_branch({
 			    request    => $dsn,
@@ -858,13 +918,13 @@ sub _parse_branch {
     my $opts = $attr->{$tag}||[];
 
     for my $a (@{$opts}) {
-      ($tmp)              = $blk =~ m|<$tag[^>]+$a="([^"]+?)"|smix;
+      ($tmp)              = $blk =~ m{<$tag[^>]+$a="([^"]+?)"}smix;
       if(defined $tmp) {
 	$ref->{"${tag}_$a"} = $tmp;
       }
     }
 
-    ($tmp) = $blk =~ m|<$tag[^>]*>([^<]+)</$tag>|smix;
+    ($tmp) = $blk =~ m{<$tag[^>]*>([^<]+)</$tag>}smix;
     if(defined $tmp) {
       $tmp         =~ s/^\s+$//smgx;
       if(length $tmp) {
@@ -872,7 +932,7 @@ sub _parse_branch {
       }
     }
     if($tmp && $DEBUG) {
-      print {*STDERR} q( )x($depth*2), qq(  $tag = $tmp\n);
+      print {*STDERR} q( )x($depth*2), qq(  $tag = $tmp\n); ## no critic (InputOutput::RequireCheckedSyscalls)
     }
   }
 
@@ -900,19 +960,19 @@ sub _parse_twig {
   #########
   # handle multiples of twig elements here
   #
-  $blk =~ s!$LINKRE!{
+  $blk =~ s/$LINKRE/{
                      $ref->{'link'} ||= [];
                      push @{$ref->{'link'}}, {
                                               'href' => $1,
                                               'txt'  => $2,
                                              };
                      q()
-                    }!smegix;
-  $blk =~ s!$NOTERE!{
+                    }/smegix;
+  $blk =~ s/$NOTERE/{
                      $ref->{'note'} ||= [];
                      push @{$ref->{'note'}}, $1;
                      q()
-                    }!smegix;
+                    }/smegix;
 
   if($addseginfo && $self->{'currentsegs'}->{$dsn}) {
     while(my ($k, $v) = each %{$self->{'currentsegs'}->{$dsn}}) {
@@ -965,10 +1025,15 @@ sub registry_sources {
       $DEBUG and print {*STDERR} qq(Running request for $reg\n);
 
       $SIG{ALRM} = sub { croak 'timeout'; };
-      alarm $TIMEOUT;
+      alarm $self->timeout();
+
       eval {
 	push @{$self->{'_registry_sources'}}, @{$soap->listServices()};
+
+      } or do {
+	carp $EVAL_ERROR;
       };
+
       alarm 0;
     }
   }
@@ -988,7 +1053,7 @@ sub registry_sources {
   if((ref $capability eq 'ARRAY') &&
      (scalar @{$capability})) {
     my $str    = join q(|), @{$capability};
-    my $match  = qr/$str/;
+    my $match  = qr/$str/mx;
     $sources = [grep { $self->_filter_capability($_, $match) } @{$sources}];
   }
 
@@ -1017,7 +1082,7 @@ sub _filter_category {
   my ($self, $src, $match) = @_;
   for my $scoord (@{$src->{'coordinateSystem'}}) {
     for my $m (@{$match}) {
-      return 1 if($scoord->{'category'} eq $m);
+       return 1 if($scoord->{'category'} eq $m);
     }
   }
   return 0;
@@ -1056,6 +1121,7 @@ Bio::Das::Lite - Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.o
  Options can be: dsn        (optional scalar or array ref, URLs of DAS services)
                  timeout    (optional int,      HTTP fetch timeout in seconds)
                  http_proxy (optional scalar,   web cache or proxy if not set in %ENV)
+                 no_proxy   (optional list/ref, non-proxiable domains if not set in %ENV)
                  caching    (optional bool,     primitive caching on/off)
                  callback   (optional code ref, callback for processed XML blocks)
                  registry   (optional array ref containing DAS registry service URLs
@@ -1099,6 +1165,14 @@ For a complete list of capabilities and categories, see:
   This is only required if the password wasn't specified when setting http_proxy
 
     $das->proxy_pass('secretpassword');
+
+=head2 no_proxy : Get/Set domains to not use proxy for
+
+    $das->no_proxy('ebi.ac.uk', 'localhost');
+    OR
+    $das->no_proxy( ['ebi.ac.uk', 'localhost'] );
+    
+    Always returns an arrayref
 
 =head2 user_agent : Get/Set user-agent for request headers
 
@@ -1190,8 +1264,9 @@ For a complete list of capabilities and categories, see:
                                       # optional args - see DAS Spec
                                      });
   my $feature_data4 = $das->features([
-                                      {'segment' => '1:1,1000000','type' => 'karyotype',},
-                                      {'segment' => '2:1,1000000',},
+                                      {'segment'  => '1:1,1000000','type' => 'karyotype',},
+                                      {'segment'  => '2:1,1000000',},
+                                      {'group_id' => 'OTTHUMG00000036084',},
                                      ]);
 
   #########
@@ -1210,6 +1285,9 @@ For a complete list of capabilities and categories, see:
 
   # or:
   $das->features(['1:1,1000000', '2:1,1000000', '3:1,1000000'], $callback);
+
+  # or:
+  $das->features([{'group_id' => 'OTTHUMG00000036084'}, '2:1,1000000', '3:1,1000000'], $callback);
 
 =head2 alignment : Retrieve protein alignment data for a query.  This can be a multiple sequence alignment
                     or pairwise alignment.  Note - this has not been tested for structural alignments as there
@@ -1239,7 +1317,12 @@ For a complete list of capabilities and categories, see:
   my $code         = $das->statuscodes($url);
   my $code_hashref = $das->statuscodes();
 
-=head2 max_req set number of running concurrent requests
+=head2 max_hosts set number of running concurrent host connections
+
+  $das->max_hosts(7);
+  print $das->max_hosts();
+
+=head2 max_req set number of running concurrent requests per host
 
   $das->max_req(5);
   print $das->max_req();
@@ -1296,6 +1379,8 @@ This module is an implementation of a client for the DAS protocol (XML over HTTP
 
 =head1 INCOMPATIBILITIES
 
+Versions of LWP from 5.816 onwards (at time of writing upto 5.820) break LWP::Parallel and
+therefore Bio::Das::Lite. It is recommended to use version 5.814 of LWP.
 
 =head1 BUGS AND LIMITATIONS
 

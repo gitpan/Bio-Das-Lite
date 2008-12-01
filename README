@@ -1,5 +1,8 @@
-Bio-Das::Lite
-===========
+Bio::Das::Lite
+==============
+
+WARNING: see below for details of incompatible dependencies currently affecting
+         Bio::Das::Lite.
 
 Bio::Das::Lite is an implementation of the BioDas protocol, http://biodas.org/
 for the retrieval of biological data from XML sources over HTTP.
@@ -32,6 +35,12 @@ This module requires these other modules and libraries:
 
 LWP::Parallel::UserAgent
 SOAP::Lite is required for non-DAS/2 registry support
+
+WARNING: recent versions of LWP (libwww-perl) break LWP::Parallel, the core
+         dependency of Bio::Das::Lite. At the time of writing (14th Nov 2008)
+         this affects all versions of LWP from 5.816 (currently upto 5.820).
+         There is no fix. It is recommended to use the last known working
+         version: libwww-perl-5.814.
 
 COPYRIGHT AND LICENCE
 
