@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/07/20 12:55:03 $ $Author: rmp $
-# Id:            $Id: Makefile.PL,v 1.46 2007/07/20 12:55:03 rmp Exp $
+# Last Modified: $Date: 2009/01/12 10:29:26 $ $Author: rmp $
+# Id:            $Id: Makefile.PL,v 1.47 2009/01/12 10:29:26 rmp Exp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/Makefile.PL,v $
 # $HeadURL$
 #
@@ -12,7 +12,7 @@ use 5.005;
 use ExtUtils::MakeMaker;
 use English qw(-no_match_vars);
 
-our $VERSION = do { my @r = (q$Revision: 1.46 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.47 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 WriteMakefile(
 	      'NAME'          => 'Bio::Das::Lite',
@@ -21,12 +21,13 @@ WriteMakefile(
 	      'VERSION_FROM'  => 'lib/Bio/Das/Lite.pm',
 	      'DISTNAME'      => 'Bio-Das-Lite',
 	      'PREREQ_PM'     => {
-				  'LWP::Parallel::UserAgent' => 0,
-				  'HTTP::Request'            => 1.4,
-				  'HTTP::Headers'            => 1.64,
-				  'SOAP::Lite'               => 0.69,
-				  'English'                  => 1.01,
-				  'Carp'                     => 1.02,
+				  'LWP::Parallel::UserAgent' => '0',
+				  'HTTP::Request'            => '1.4',
+				  'HTTP::Headers'            => '1.64',
+				  'SOAP::Lite'               => '0.69',
+				  'English'                  => '1.01',
+				  'Carp'                     => '1.02',
+				  'Readonly'                 => '1.03',
 				 },
 	      'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz', },
 	      'LICENSE'       => 'perl',

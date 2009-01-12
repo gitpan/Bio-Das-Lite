@@ -1,5 +1,7 @@
 Revision history for Perl extension Bio::Das::Lite.
 
+1.61 Minor: Fixed prereq (for CPANTS prereq_matches_use)
+
 1.60 Latest LWP has broken support for "parse_head"
      function. Das::Lite attempts to correct for this by squirting an
      ersatz version into the symbol table under LWP::Protocol, where

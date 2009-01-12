@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2008/12/01 16:59:40 $ $Author: rmp $
+# Last Modified: $Date: 2009/01/12 10:29:26 $ $Author: rmp $
 # Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm,v 1.60 2008/12/01 16:59:40 rmp Exp $
+# Id:            $Id: Lite.pm,v 1.61 2009/01/12 10:29:26 rmp Exp $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -19,7 +19,7 @@ use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.60 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 1.61 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 Readonly::Scalar our $BLK_SIZE => 8192;
 Readonly::Scalar our $TIMEOUT  => 5;
 Readonly::Scalar our $MAX_REQ  => 5;
