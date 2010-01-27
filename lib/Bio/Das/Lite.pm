@@ -10,7 +10,7 @@
 package Bio::Das::Lite;
 use strict;
 use warnings;
-use Bio::Das::Lite::UserAgent;
+use WWW::Curl::Simple;
 use HTTP::Request;
 use HTTP::Headers;
 use SOAP::Lite;
@@ -19,13 +19,13 @@ use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 1.61 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.00 $ =~ /\d+/smxg); sprintf '%d.'.'%03d' x $#r, @r };
 Readonly::Scalar our $BLK_SIZE => 8192;
 Readonly::Scalar our $TIMEOUT  => 5;
 Readonly::Scalar our $MAX_REQ  => 5;
 Readonly::Scalar our $MAX_HOST => 7;
-Readonly::Scalar our $LINKRE   => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>}mix;
-Readonly::Scalar our $NOTERE   => qr{<note[^>]*>([^<]*)</note>}mix;
+Readonly::Scalar our $LINKRE   => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>}smix;
+Readonly::Scalar our $NOTERE   => qr{<note[^>]*>([^<]*)</note>}smix;
 
 BEGIN {
   if(!LWP::Protocol->can('parse_head')) {
@@ -356,7 +356,7 @@ sub http_proxy {
     $self->{'_checked_http_proxy_env'} = 1;
   }
 
-  if($self->{'http_proxy'} =~ m{^(https?://)(\S+):(.*?)\@(.*?)$}mx) {
+  if($self->{'http_proxy'} =~ m{^(https?://)(\S+):(.*?)\@(.*?)$}smx) {
     #########
     # http_proxy contains username & password - we'll set them up here:
     #
@@ -381,7 +381,7 @@ sub no_proxy {
   }
 
   if(!$self->{'_checked_no_proxy_env'}) {
-    $self->{'no_proxy'} ||= [split /\s*,\s*/mx, $ENV{'no_proxy'} || q()];
+    $self->{'no_proxy'} ||= [split /\s*,\s*/smx, $ENV{'no_proxy'} || q()];
     $self->{'_checked_no_proxy_env'} = 1;
   }
 
@@ -443,7 +443,7 @@ sub basename {
   my @res          = ();
 
   for my $service (@dsns) {
-    $service =~ m{(https?://.*/das)/?}mx;
+    $service =~ m{(https?://.*/das)/?}smx;
     if($1) {
       push @res, $1;
     }
@@ -544,8 +544,8 @@ sub _generic_request {
   delete $self->{'currentsegs'};
   my $results   = {};
   my $reqname   = $fname;
-  $reqname      =~ s/[\(\)]//mxg;
-  ($fname)      = $fname =~ /^([a-z_]+)/mx;
+  $reqname      =~ s/[\(\)]//smxg;
+  ($fname)      = $fname =~ /^([a-z_]+)/smx;
 
   my $ref       = $self->build_requests({
 					 query   => $query,
@@ -605,7 +605,7 @@ sub build_queries {
 	#########
 	# ... or if the first array arg is a hash, stitch the series of queries together
 	#
-	push @queries, map { ## no critic
+	push @queries, map { ## no critic (ProhibitComplexMappings)
 	  my $q = $_;
 	  join q(;), map { "$_=$q->{$_}" } grep { $q->{$_} } @{$OPTS->{$fname}};
 	} @{$query};
@@ -686,7 +686,7 @@ sub build_requests {
 	  # If we haven't yet found segment information for this request
 	  # Then look for some. This one is a non-destructive scan.
 	  #
-	  my $matches = $self->{'data'}->{$request}  =~ m{(<segment[^>]*>)}mix;
+	  my $matches = $self->{'data'}->{$request}  =~ m{(<segment[^>]*>)}smix;
 
 	  if($matches) {
 	    my $seginfo = [];
@@ -714,7 +714,7 @@ sub build_requests {
 	$fname = $self->_hack_fname($fname);
 
 	my $pat = qr{(<$fname.*?/$fname>|<$fname[^>]+/>)}smix;
-	while($self->{'data'}->{$request} =~ s/$pat//mx) {
+	while($self->{'data'}->{$request} =~ s/$pat//smx) {
 	  $self->_parse_branch({
 				request    => $request,
 				seginfo    => $results->{$request},
@@ -791,18 +791,16 @@ sub postprocess {
 sub _fetch {
   my ($self, $url_ref, $headers) = @_;
 
-  if (!$self->{'ua'}) {
-    $self->{'ua'} = Bio::Das::Lite::UserAgent->new();
-    $self->{'ua'}->proxy( ['http','https'], $self->http_proxy() );
-    $self->{'ua'}->no_proxy( @{ $self->no_proxy() } );
+  my $ua = WWW::Curl::Simple->new;
+
+  $self->{'statuscodes'} = {};
+  if(!$headers) {
+    $headers = {};
   }
 
-  $self->{'ua'}->initialize();
-  $self->{'ua'}->max_req  ($self->max_req()   || $MAX_REQ );
-  $self->{'ua'}->max_hosts($self->max_hosts() || $MAX_HOST);
-  $self->{'statuscodes'}          = {};
-  $headers                      ||= {};
-  $headers->{'X-Forwarded-For'} ||= $ENV{'HTTP_X_FORWARDED_FOR'};
+  if($ENV{HTTP_X_FORWARDED_FOR}) {
+    $headers->{'X-Forwarded-For'} ||= $ENV{'HTTP_X_FORWARDED_FOR'};
+  }
 
   for my $url (keys %{$url_ref}) {
     if(ref $url_ref->{$url} ne 'CODE') {
@@ -810,36 +808,25 @@ sub _fetch {
     }
     $DEBUG and print {*STDERR} qq(Building HTTP::Request for $url [timeout=$self->{'timeout'}] via $url_ref->{$url}\n);
 
-    my $headers = HTTP::Headers->new(%{$headers});
-    $headers->user_agent($self->user_agent());
+    my $http_headers = HTTP::Headers->new(%{$headers});
+    $http_headers->user_agent($self->user_agent());
 
     if($self->proxy_user() && $self->proxy_pass()) {
       $headers->proxy_authorization_basic($self->proxy_user(), $self->proxy_pass());
     }
 
-    my $response = $self->{'ua'}->register(HTTP::Request->new('GET', $url, $headers),
-					   $url_ref->{$url},
-					   $BLK_SIZE);
-    if($response) {
-      $self->{'statuscodes'}->{$url} ||= $response->status_line();
-    }
+    $ua->register(HTTP::Request->new('GET', $url, $http_headers));
   }
 
+  my @res = $ua->perform;
   $DEBUG and print {*STDERR} qq(Requests submitted. Waiting for content\n);
-  eval {
-    $self->{'ua'}->wait($self->{'timeout'});
-
-  } or do {
-    carp $EVAL_ERROR;
-  };
-
-  for my $url (keys %{$url_ref}) {
-    if(ref $url_ref->{$url} ne 'CODE') {
-      next;
-    }
-
-    $self->{'statuscodes'}->{$url} ||= '200';
+  for my $req (@res) {
+    my $res              = $req->response;
+    my $uri = $res->request->uri;
+    $self->{statuscodes}->{$uri} = $res->code;
+    $url_ref->{$uri}->($res->content);
   }
+
   return;
 }
 
@@ -847,14 +834,14 @@ sub statuscodes {
   my ($self, $url)         = @_;
   $self->{'statuscodes'} ||= {};
 
-  if($self->{'ua'}) {
-    my $uacodes = $self->{'ua'}->statuscodes();
-    for my $k (keys %{$uacodes}) {
-      if($uacodes->{$k}) {
-	$self->{'statuscodes'}->{$k} = $uacodes->{$k};
-      }
-    }
-  }
+#  if($self->{'ua'}) {
+#    my $uacodes = $self->{'ua'}->statuscodes();
+#    for my $k (keys %{$uacodes}) {
+#      if($uacodes->{$k}) {
+#	$self->{'statuscodes'}->{$k} = $uacodes->{$k};
+#      }
+#    }
+#  }
 
   return $url?$self->{'statuscodes'}->{$url}:$self->{'statuscodes'};
 }
@@ -889,7 +876,7 @@ sub _parse_branch {
     my $subpart_ref  = [];
 
     my $pat = qr{(<$subpart[^>]*/>|<$subpart[^>]*?(?!/)>.*?/$subpart>)}smix;
-    while($blk =~ s/$pat//mx) {
+    while($blk =~ s/$pat//smx) {
       $self->_parse_branch({
 			    request    => $dsn,
 			    seginfo    => $subpart_ref,
@@ -1024,7 +1011,7 @@ sub registry_sources {
 
       $DEBUG and print {*STDERR} qq(Running request for $reg\n);
 
-      $SIG{ALRM} = sub { croak 'timeout'; };
+      local $SIG{ALRM} = sub { croak 'timeout'; };
       alarm $self->timeout();
 
       eval {
@@ -1053,7 +1040,7 @@ sub registry_sources {
   if((ref $capability eq 'ARRAY') &&
      (scalar @{$capability})) {
     my $str    = join q(|), @{$capability};
-    my $match  = qr/$str/mx;
+    my $match  = qr/$str/smx;
     $sources = [grep { $self->_filter_capability($_, $match) } @{$sources}];
   }
 

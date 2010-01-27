@@ -21,15 +21,18 @@ WriteMakefile(
 	      'VERSION_FROM'  => 'lib/Bio/Das/Lite.pm',
 	      'DISTNAME'      => 'Bio-Das-Lite',
 	      'PREREQ_PM'     => {
-				  'LWP::Parallel::UserAgent' => '0',
-				  'HTTP::Request'            => '1.4',
-				  'HTTP::Headers'            => '1.64',
-				  'SOAP::Lite'               => '0.69',
-				  'English'                  => '1.01',
-				  'Carp'                     => '1.02',
-				  'Readonly'                 => '1.03',
+				  'WWW::Curl::Simple' => '0.100181',
+				  'HTTP::Request'     => '1.4',
+				  'HTTP::Headers'     => '1.64',
+				  'SOAP::Lite'        => '0.69',
+				  'English'           => '1.01',
+				  'Carp'              => '1.02',
+				  'Readonly'          => '1.03',
 				 },
-	      'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz', },
+	      'dist'          => {
+				  COMPRESS => 'gzip',
+				  SUFFIX   => 'gz',
+				 },
 	      'LICENSE'       => 'perl',
 	     );
 
