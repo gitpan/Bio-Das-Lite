@@ -2,7 +2,7 @@
 # Author:        rmp
 # Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
 # Id:            $Id: FileStubCompat.pm,v 1.1 2007/02/20 14:31:54 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/FileStubCompat.pm,v $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/FileStubCompat.pm,v $
 # $HeadURL$
 #
 package t::FileStubCompat;

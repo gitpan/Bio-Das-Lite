@@ -1,8 +1,8 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/03/16 13:34:39 $ $Author: rmp $
-# Id:            $Id: 00-critic.t,v 1.2 2007/03/16 13:34:39 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/00-critic.t,v $
+# Last Modified: $Date: 2010/02/04 15:01:56 $ $Author: aj5 $
+# Id:            $Id: 00-critic.t,v 1.3 2010/02/04 15:01:56 aj5 Exp $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/00-critic.t,v $
 # $HeadURL$
 #
 package critic;
@@ -11,7 +11,7 @@ use warnings;
 use Test::More;
 use English qw(-no_match_vars);
 
-our $VERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 if ( not $ENV{TEST_AUTHOR} ) {
   my $msg = 'Author test.  Set $ENV{TEST_AUTHOR} to a true value to run.';

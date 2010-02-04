@@ -14,11 +14,13 @@ t/00-distribution.t
 t/00-pod.t
 t/00-podcoverage.t
 t/01-general.t
+t/02-statuscodes.t
 t/05-singledsn.t
 t/06-singledsn-singleseg.t
 t/07-singledsn-multiseg.t
 t/10-multidsn.t
 t/20-authentication.t
+t/21-proxy.t
 t/40-dna.t
 t/45-sequence.t
 t/50-entry_points.t
@@ -31,7 +33,6 @@ t/80-structure.t
 t/90-sources.t
 t/FileStub.pm
 t/FileStubChunked.pm
-t/FileStubChunkedCompat.pm
 t/FileStubCompat.pm
 t/alignment.xml
 t/dna.xml

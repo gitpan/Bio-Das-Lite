@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2009/01/12 10:29:26 $ $Author: rmp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm,v 1.61 2009/01/12 10:29:26 rmp Exp $
+# Last Modified: $Date: 2010/02/04 15:01:56 $ $Author: aj5 $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
+# Id:            $Id: Lite.pm,v 1.67 2010/02/04 15:01:56 aj5 Exp $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -19,20 +19,22 @@ use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = do { my @r = (q$Revision: 2.00 $ =~ /\d+/smxg); sprintf '%d.'.'%03d' x $#r, @r };
-Readonly::Scalar our $BLK_SIZE => 8192;
-Readonly::Scalar our $TIMEOUT  => 5;
-Readonly::Scalar our $MAX_REQ  => 5;
-Readonly::Scalar our $MAX_HOST => 7;
-Readonly::Scalar our $LINKRE   => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>}smix;
-Readonly::Scalar our $NOTERE   => qr{<note[^>]*>([^<]*)</note>}smix;
-
-BEGIN {
-  if(!LWP::Protocol->can('parse_head')) {
-    require LWP::Protocol;
-    *LWP::Protocol::parse_head = sub { shift->_elem('parse_head', @_); };
-  }
-}
+our $VERSION  = '2.01';
+Readonly::Scalar our $TIMEOUT         => 5;
+Readonly::Scalar our $REG_TIMEOUT     => 15;
+Readonly::Scalar our $LINKRE          => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>|<link\s+href="([^"]+)"[^>]*?/>}smix;
+Readonly::Scalar our $NOTERE          => qr{<note[^>]*>([^<]*)</note>}smix;
+Readonly::Scalar our $DAS_STATUS_TEXT => {
+					  200 => '200 OK',
+					  400 => '400 Bad command (command not recognized)',
+					  401 => '401 Bad data source (data source unknown)',
+					  402 => '402 Bad command arguments (arguments invalid)',
+					  403 => '403 Bad reference object',
+					  404 => '404 Requested object unknown',
+					  405 => '405 Coordinate error',
+					  500 => '500 Server error',
+					  501 => '501 Unimplemented feature',
+					 };
 
 #########
 # $ATTR contains information about document structure - tags, attributes and subparts
@@ -338,8 +340,18 @@ sub new {
 
 sub new_from_registry {
   my ($class, $ref) = @_;
+  my $user_timeout = defined $ref->{timeout} ? 1 : 0;
   my $self    = $class->new($ref);
+  # If the user specifies a timeout, use it.
+  # But if not, temporarily increase the timeout for the registry request.
+  if (!$user_timeout) {
+    $self->timeout($REG_TIMEOUT);
+  }
   my $sources = $self->registry_sources($ref);
+  # And reset it back to the "normal" non-registry timeout.
+  if (!$user_timeout) {
+    $self->timeout($TIMEOUT);
+  }
   $self->dsn([map { $_->{'url'} } @{$sources}]);
   return $self;
 }
@@ -663,7 +675,8 @@ sub build_requests {
     #########
     # loop over dsn basenames
     #
-    for my $request (map { "$bn/$reqname?$_" } @{$queries}) {
+    $bn =~ s/\/+$//smx;
+    for my $request (map { $_ ? "$bn/$reqname?$_" : "$bn/$reqname" } @{$queries}) {
       #########
       # and for each dsn, loop over the query request
       #
@@ -678,7 +691,7 @@ sub build_requests {
 
       $results->{$request} = [];
       $ref->{$request}     = sub {
-	my $data                     = shift;
+	my $data                     = shift || q();
 	$self->{'data'}->{$request} .= $data;
 
 	if(!$self->{'currentsegs'}->{$request}) {
@@ -812,7 +825,7 @@ sub _fetch {
     $http_headers->user_agent($self->user_agent());
 
     if($self->proxy_user() && $self->proxy_pass()) {
-      $headers->proxy_authorization_basic($self->proxy_user(), $self->proxy_pass());
+      $http_headers->proxy_authorization_basic($self->proxy_user(), $self->proxy_pass());
     }
 
     $ua->register(HTTP::Request->new('GET', $url, $http_headers));
@@ -821,9 +834,23 @@ sub _fetch {
   my @res = $ua->perform;
   $DEBUG and print {*STDERR} qq(Requests submitted. Waiting for content\n);
   for my $req (@res) {
-    my $res              = $req->response;
+    my $res = $req->response;
     my $uri = $res->request->uri;
-    $self->{statuscodes}->{$uri} = $res->code;
+    my $msg;
+    # Prefer X-DAS-Status
+    if (my $das_status = $res->header('X-DAS-Status')) {
+      $msg = $self->{statuscodes}->{$uri} = $DAS_STATUS_TEXT->{$das_status};
+      # just in case we get a status we don't understand:
+      $msg ||= $das_status . q( ) . ($res->message || 'Unknown status');
+    }
+    # Fall back to HTTP status
+    else {
+      $msg  = $res->status_line;
+      # workaround for bug in HTTP::Response parse method:
+      $msg  =~ s/\r$//smx;
+    }
+
+    $self->{statuscodes}->{$uri} = $msg;
     $url_ref->{$uri}->($res->content);
   }
 
@@ -833,16 +860,6 @@ sub _fetch {
 sub statuscodes {
   my ($self, $url)         = @_;
   $self->{'statuscodes'} ||= {};
-
-#  if($self->{'ua'}) {
-#    my $uacodes = $self->{'ua'}->statuscodes();
-#    for my $k (keys %{$uacodes}) {
-#      if($uacodes->{$k}) {
-#	$self->{'statuscodes'}->{$k} = $uacodes->{$k};
-#      }
-#    }
-#  }
-
   return $url?$self->{'statuscodes'}->{$url}:$self->{'statuscodes'};
 }
 
@@ -950,7 +967,7 @@ sub _parse_twig {
   $blk =~ s/$LINKRE/{
                      $ref->{'link'} ||= [];
                      push @{$ref->{'link'}}, {
-                                              'href' => $1,
+                                              'href' => $1 || $3,
                                               'txt'  => $2,
                                              };
                      q()
@@ -987,7 +1004,7 @@ sub registry_sources {
 
   $filters       ||= {};
   my $category     = $filters->{'category'}   || [];
-  my $capability   = $filters->{'capability'} || [];
+  my $capability   = $filters->{'capability'} || $filters->{'capabilities'} || [];
 
   if(!ref $category) {
     $category = [$category];
@@ -1119,18 +1136,18 @@ Bio::Das::Lite - Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.o
 
 =head2 new_from_registry : Constructor
 
-  Similar to 'new' above but supports 'capabilities' and 'category'
+  Similar to 'new' above but supports 'capability' and 'category'
   in the given hashref, using them to query the DAS registry and
   configuring the DSNs accordingly.
 
   my $das = Bio::Das::Lite->new_from_registry({
-					     'capabilities' => ['features'],
-					     'category'     => ['Protein Sequence'],
+					     'capability' => ['features'],
+					     'category'   => ['Protein Sequence'],
 					    });
 
  Options are as above, plus
-                 capability   (optional arrayref of capabilities)
-                 category     (optional arrayref of categories)
+                 capability OR capabilities   (optional arrayref of capabilities)
+                 category                     (optional arrayref of categories)
 
 
 For a complete list of capabilities and categories, see:
@@ -1338,7 +1355,7 @@ Constructs an arrayref of DAS requests including parameters for each call
 
 =head2 build_requests
 
-Constructs the LWP::P::UA callbacks
+Constructs the WWW::Curl callbacks
 
 =head2 postprocess
 
@@ -1350,12 +1367,27 @@ This module is an implementation of a client for the DAS protocol (XML over HTTP
 
 =head1 DEPENDENCIES
 
-  LWP::Parallel::UserAgent
-  HTTP::Request
-  HTTP::Headers
-  SOAP::Lite
-  Carp
-  English
+=over
+
+=item strict
+
+=item warnings
+
+=item WWW::Curl::Simple
+
+=item HTTP::Request
+
+=item HTTP::Headers
+
+=item SOAP::Lite
+
+=item Carp
+
+=item English
+
+=item Readonly
+
+=back
 
 =head1 DIAGNOSTICS
 
@@ -1366,11 +1398,7 @@ This module is an implementation of a client for the DAS protocol (XML over HTTP
 
 =head1 INCOMPATIBILITIES
 
-Versions of LWP from 5.816 onwards (at time of writing upto 5.820) break LWP::Parallel and
-therefore Bio::Das::Lite. It is recommended to use version 5.814 of LWP.
-
 =head1 BUGS AND LIMITATIONS
-
 
 =head1 SEE ALSO
 

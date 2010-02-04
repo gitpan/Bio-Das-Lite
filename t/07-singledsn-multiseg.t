@@ -2,7 +2,7 @@
 # Author:        rmp
 # Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
 # Id:            $Id: 07-singledsn-multiseg.t,v 1.42 2007/02/23 00:18:19 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/07-singledsn-multiseg.t,v $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/07-singledsn-multiseg.t,v $
 # $HeadURL$
 #
 package singledsn_multiseg;

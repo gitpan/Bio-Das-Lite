@@ -2,7 +2,7 @@
 # Author:        rmp
 # Last Modified: $Date: 2007/02/23 00:18:19 $ $Author: rmp $
 # Id:            $Id: 00-distribution.t,v 1.41 2007/02/23 00:18:19 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/00-distribution.t,v $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/00-distribution.t,v $
 # $HeadURL$
 #
 package distribution;

@@ -2,7 +2,7 @@
 # Author:        rdf
 # Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
 # Id:            $Id: 70-alignment.t,v 1.2 2007/02/20 14:31:54 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/70-alignment.t,v $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/70-alignment.t,v $
 # $HeadURL$
 #
 package alignment;

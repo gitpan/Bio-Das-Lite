@@ -1,5 +1,7 @@
 Revision history for Perl extension Bio::Das::Lite.
 
+2.00 Switched to WWW::Curl::Simple (from LWP::Parallel::UserAgent)
+
 1.61 Minor: Fixed prereq (for CPANTS prereq_matches_use)
 
 1.60 Latest LWP has broken support for "parse_head"

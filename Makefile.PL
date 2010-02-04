@@ -1,8 +1,8 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2009/01/12 10:29:26 $ $Author: rmp $
-# Id:            $Id: Makefile.PL,v 1.47 2009/01/12 10:29:26 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/Makefile.PL,v $
+# Last Modified: $Date: 2010/02/04 15:01:56 $ $Author: aj5 $
+# Id:            $Id: Makefile.PL,v 1.48 2010/02/04 15:01:56 aj5 Exp $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/Makefile.PL,v $
 # $HeadURL$
 #
 package Makefile;
@@ -12,7 +12,7 @@ use 5.005;
 use ExtUtils::MakeMaker;
 use English qw(-no_match_vars);
 
-our $VERSION = do { my @r = (q$Revision: 1.47 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 1.48 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 WriteMakefile(
 	      'NAME'          => 'Bio::Das::Lite',

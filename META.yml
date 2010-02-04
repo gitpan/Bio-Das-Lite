@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Bio-Das-Lite
-version:            2.000
+version:            2.01
 abstract:           Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.org/)
 author:
     - Roger Pettett <rpettett@cpan.org>

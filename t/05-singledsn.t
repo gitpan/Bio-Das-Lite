@@ -2,7 +2,7 @@
 # Author:        rmp
 # Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
 # Id:            $Id: 05-singledsn.t,v 1.41 2007/02/20 14:31:54 rmp Exp $
-# Source:        $Source: /cvsroot/Bio-DasLite/Bio-DasLite/t/05-singledsn.t,v $
+# Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/05-singledsn.t,v $
 # $HeadURL$
 #
 package singledsn;
