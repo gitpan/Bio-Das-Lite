@@ -10,16 +10,16 @@
 package Bio::Das::Lite;
 use strict;
 use warnings;
-use WWW::Curl::Simple;
-use HTTP::Request;
-use HTTP::Headers;
+use WWW::Curl::Multi;
+use WWW::Curl::Easy; # CURLOPT imports
+use HTTP::Response;
 use SOAP::Lite;
 use Carp;
 use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = '2.01';
+our $VERSION  = '2.02';
 Readonly::Scalar our $TIMEOUT         => 5;
 Readonly::Scalar our $REG_TIMEOUT     => 15;
 Readonly::Scalar our $LINKRE          => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>|<link\s+href="([^"]+)"[^>]*?/>}smix;
@@ -435,11 +435,13 @@ sub caching {
 
 sub max_hosts {
   my ($self, $val) = @_;
+  carp 'WARNING: max_hosts method is decprecated and has no effect';
   return $self->_get_set('_max_hosts', $val);
 }
 
 sub max_req {
   my ($self, $val) = @_;
+  carp 'WARNING: max_req method is decprecated and has no effect';
   return $self->_get_set('_max_req', $val);
 }
 
@@ -804,8 +806,6 @@ sub postprocess {
 sub _fetch {
   my ($self, $url_ref, $headers) = @_;
 
-  my $ua = WWW::Curl::Simple->new;
-
   $self->{'statuscodes'} = {};
   if(!$headers) {
     $headers = {};
@@ -815,43 +815,116 @@ sub _fetch {
     $headers->{'X-Forwarded-For'} ||= $ENV{'HTTP_X_FORWARDED_FOR'};
   }
 
+  # Convert header pairs to strings
+  my @headers;
+  for my $h (keys %{ $headers }) {
+    push @headers, "$h: " . $headers->{$h};
+  }
+
+  # We will now issue the actual requests. Due to insufficient support for error
+  # handling and proxies, we can't use WWW::Curl::Simple. So we generate a
+  # WWW::Curl::Easy object here, and register it with WWW::Curl::Multi.
+
+  my $curlm = WWW::Curl::Multi->new();
+  my %reqs;
+  my $i = 0;
+
+  # First initiate the requests
   for my $url (keys %{$url_ref}) {
     if(ref $url_ref->{$url} ne 'CODE') {
       next;
     }
-    $DEBUG and print {*STDERR} qq(Building HTTP::Request for $url [timeout=$self->{'timeout'}] via $url_ref->{$url}\n);
+    $DEBUG and print {*STDERR} qq(Building WWW::Curl::Easy for $url [timeout=$self->{'timeout'}] via $url_ref->{$url}\n);
 
-    my $http_headers = HTTP::Headers->new(%{$headers});
-    $http_headers->user_agent($self->user_agent());
+    $i++;
+    my $curl = WWW::Curl::Easy->new();
 
-    if($self->proxy_user() && $self->proxy_pass()) {
-      $http_headers->proxy_authorization_basic($self->proxy_user(), $self->proxy_pass());
+    $curl->setopt( CURLOPT_NOPROGRESS, 1 );
+    $curl->setopt( CURLOPT_USERAGENT, $self->user_agent );
+    $curl->setopt( CURLOPT_URL, $url );
+
+    if (scalar @headers) {
+        $curl->setopt( CURLOPT_HTTPHEADER, \@headers );
     }
+    my ($body_ref, $head_ref);
+    CORE::open my $fileb, '>', \$body_ref || croak 'Error opening data handle';
+    $curl->setopt( CURLOPT_WRITEDATA, $fileb );
 
-    $ua->register(HTTP::Request->new('GET', $url, $http_headers));
+    CORE::open my $fileh, '>', \$head_ref || croak 'Error opening header handle';
+    $curl->setopt( CURLOPT_WRITEHEADER, $fileh );
+
+    # we set this so we have the ref later on
+    $curl->setopt( CURLOPT_PRIVATE, $i );
+    $curl->setopt( CURLOPT_TIMEOUT, $self->timeout || $TIMEOUT );
+    #$curl->setopt( CURLOPT_CONNECTTIMEOUT, $self->connection_timeout || 2 );
+    $curl->setopt( CURLOPT_PROXY, $self->http_proxy );
+    $curl->setopt( CURLOPT_PROXYUSERNAME, $self->proxy_user );
+    $curl->setopt( CURLOPT_PROXYPASSWORD, $self->proxy_pass );
+    $curl->setopt( CURLOPT_NOPROXY, join q(,), @{ $self->no_proxy } );
+
+    $curlm->add_handle($curl);
+
+    $reqs{$i} = {
+                 'uri'  => $url,
+                 'easy' => $curl,
+                 'head' => \$head_ref,
+                 'body' => \$body_ref,
+                };
   }
 
-  my @res = $ua->perform;
   $DEBUG and print {*STDERR} qq(Requests submitted. Waiting for content\n);
-  for my $req (@res) {
-    my $res = $req->response;
-    my $uri = $res->request->uri;
-    my $msg;
-    # Prefer X-DAS-Status
-    if (my $das_status = $res->header('X-DAS-Status')) {
-      $msg = $self->{statuscodes}->{$uri} = $DAS_STATUS_TEXT->{$das_status};
-      # just in case we get a status we don't understand:
-      $msg ||= $das_status . q( ) . ($res->message || 'Unknown status');
-    }
-    # Fall back to HTTP status
-    else {
-      $msg  = $res->status_line;
-      # workaround for bug in HTTP::Response parse method:
-      $msg  =~ s/\r$//smx;
-    }
 
-    $self->{statuscodes}->{$uri} = $msg;
-    $url_ref->{$uri}->($res->content);
+  $self->_receive($url_ref, $curlm, \%reqs);
+
+  return;
+}
+
+sub _receive {
+  my ($self, $url_ref, $curlm, $reqs) = @_;
+
+  # Now check for results as they come back
+  my $i = scalar keys %{ $reqs };
+  while ($i) {
+    my $active_transfers = $curlm->perform;
+    if ($active_transfers != $i) {
+      while (my ($id,$retcode) = $curlm->info_read) {
+        $id || next;
+
+        $i--;
+        my $req  = $reqs->{$id};
+        my $uri  = $req->{'uri'};
+        my $head = ${ $req->{'head'} } || q();
+        my $body = ${ $req->{'body'} } || q();
+
+        # We got a response from the server:
+        if ($retcode == 0) {
+          my $res = HTTP::Response->parse( $head . "\n" . $body );
+          my $msg;
+          # Prefer X-DAS-Status
+          my ($das_status) = ($res->header('X-DAS-Status') || q()) =~ m/^(\d+)/smx;
+          if ($das_status) {
+            $msg = $self->{statuscodes}->{$uri} = $DAS_STATUS_TEXT->{$das_status};
+            # just in case we get a status we don't understand:
+            $msg ||= $das_status . q( ) . ($res->message || 'Unknown status');
+          }
+          # Fall back to HTTP status
+          else {
+            $msg  = $res->status_line;
+            # workaround for bug in HTTP::Response parse method:
+            $msg  =~ s/\r//gsmx;
+          }
+
+          $self->{statuscodes}->{$uri} = $msg;
+          $url_ref->{$uri}->($res->content); # run the content handling code
+        }
+        # A connection error, timeout etc (NOT an HTTP status):
+        else {
+          $self->{statuscodes}->{$uri} = '500 ' . $req->{'easy'}->strerror($retcode);
+        }
+
+        delete($reqs->{$id}); # put out of scope to free memory
+      }
+    }
   }
 
   return;
@@ -1086,7 +1159,18 @@ sub _filter_category {
   my ($self, $src, $match) = @_;
   for my $scoord (@{$src->{'coordinateSystem'}}) {
     for my $m (@{$match}) {
-       return 1 if($scoord->{'category'} eq $m);
+      if ($m =~ m/,/mxs) {
+        # regex REQUIRES "authority,type", and handles optional version (with proper underscore handling) and species
+        my ($auth, $ver, $cat, $org) = $m =~ m/^ (.+?) (?:_([^_,]+))? ,([^,]+) (?:,(.+))? /mxs;
+        if (lc $cat eq lc $scoord->{'category'} &&
+            $auth eq $scoord->{'name'} &&
+            (!$ver || lc $ver eq lc $scoord->{'version'}) &&
+            (!$org || lc $org eq lc $scoord->{'organismName'})) {
+          return 1;
+        }
+      } else {
+        return 1 if(lc $scoord->{'category'} eq lc $m);
+      }
     }
   }
   return 0;
@@ -1106,7 +1190,7 @@ Bio::Das::Lite - Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.o
 =head1 SYNOPSIS
 
   use Bio::Das::Lite;
-  my $bdl     = Bio::Das::Lite->new_from_registry({'category' => 'Chromosome'});
+  my $bdl     = Bio::Das::Lite->new_from_registry({'category' => 'GRCh_37,Chromosome,Homo sapiens'});
   my $results = $bdl->features('22');
 
 
@@ -1150,9 +1234,16 @@ Bio::Das::Lite - Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.o
                  category                     (optional arrayref of categories)
 
 
-For a complete list of capabilities and categories, see:
+  For a complete list of capabilities and categories, see:
 
     http://das.sanger.ac.uk/registry/
+
+  The category can optionally be a full coordinate system name,
+  allowing further restriction by authority, version and species.
+  For example:
+      'Protein Sequence' OR
+      'UniProt,Protein Sequence' OR
+      'GRCh_37,Chromosome,Homo sapiens'
 
 =head2 http_proxy : Get/Set http_proxy
 
@@ -1323,10 +1414,14 @@ For a complete list of capabilities and categories, see:
 
 =head2 max_hosts set number of running concurrent host connections
 
+  THIS METHOD IS NOW DEPRECATED AND HAS NO EFFECT
+
   $das->max_hosts(7);
   print $das->max_hosts();
 
 =head2 max_req set number of running concurrent requests per host
+
+  THIS METHOD IS NOW DEPRECATED AND HAS NO EFFECT
 
   $das->max_req(5);
   print $das->max_req();
@@ -1373,11 +1468,9 @@ This module is an implementation of a client for the DAS protocol (XML over HTTP
 
 =item warnings
 
-=item WWW::Curl::Simple
+=item WWW::Curl
 
-=item HTTP::Request
-
-=item HTTP::Headers
+=item HTTP::Response
 
 =item SOAP::Lite
 
@@ -1399,6 +1492,8 @@ This module is an implementation of a client for the DAS protocol (XML over HTTP
 =head1 INCOMPATIBILITIES
 
 =head1 BUGS AND LIMITATIONS
+
+  The max_req and max_hosts methods are now deprecated and have no effect.
 
 =head1 SEE ALSO
 
