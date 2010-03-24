@@ -1,0 +1,85 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.61.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 5feae19c38fac2351463b094a74df445d4f938af Build.PL
+SHA1 0ce1d6b2a0477d8804d498ab3a2fd9b24ada8525 Changes
+SHA1 4a217913b86e90c31384e8e0567efc515731cca4 MANIFEST
+SHA1 7eab4ef45ebb55cb31faa37dfeb07ed5d119c2d8 META.yml
+SHA1 cd9351675c76304eab73b5d3e893fbb879e1e434 Makefile.PL
+SHA1 4515827ec21e31595e96e9f70a1ea25502a829c7 README
+SHA1 766ee472447381f216f5a8568cb14b31e26c9310 eg/callback_test
+SHA1 8ca2625e70ac5e97e6cb514887bf9001baa2b65a eg/comparison
+SHA1 87fa72d78044b332162b5f2d4738ef7a8d8c88f0 eg/empty_segment
+SHA1 9e14f1c3fe6abbc1fb690150845a78bc0ba49358 eg/new_from_registry
+SHA1 f0daf11fae56c32d6185f80bd82f74836b1e5c20 eg/regtest
+SHA1 2d197b31031842996e5263b8d8051d0691c140ec eg/stylesheet_test
+SHA1 b3452ef16aa222d32f05f5840d74d7e9661e9bd5 eg/uniprot-test
+SHA1 ed5eb6ecee0bc56289d15132b71686bbbe3dc622 lib/Bio/Das/Lite.pm
+SHA1 568adefa11768a30d951071b0e6bdf1166a0bb46 t/00-critic.t
+SHA1 8f4d0a71e08516d797d578d24b29436076d5e5d6 t/00-distribution.t
+SHA1 8b6d86483f31129f7c64269838d44dfa46cb8bae t/00-pod.t
+SHA1 d27d6c01dee353ae57e633eb20679804432bbbfc t/00-podcoverage.t
+SHA1 938b480251f4a7c0ba3dd7da59fa487ece40f4b4 t/01-general.t
+SHA1 a03c0713033d6be0a1a6f0a21ff62486f2c602ef t/02-statuscodes.t
+SHA1 77e119405436e659071691d4729e679767063214 t/05-singledsn.t
+SHA1 301741de994959b070a40021d7430c10fd940fbc t/06-singledsn-singleseg.t
+SHA1 5aed7ecab723bfc1c7f76d98869a5b7428df767e t/07-singledsn-multiseg.t
+SHA1 689dfd7342144b931306eff4328add2834a91e08 t/10-multidsn.t
+SHA1 430a517db9b7377a6ac68a763f825a0a74b86bae t/20-authentication.t
+SHA1 8f8685438c2d3901817e70febcd4e86d0d293da7 t/21-proxy.t
+SHA1 06eed20454a233831e48141b00744ff42d5c5604 t/40-dna.t
+SHA1 b174fc3d64318afbbc4cf4520e564458e3e865ba t/45-sequence.t
+SHA1 8c9167cb3f36408be5d1972da95bcb8c323fb79a t/50-entry_points.t
+SHA1 e4780f57ec2c75553053560dd0e70dcc8f541615 t/60-features.t
+SHA1 4ff22e650c7522636b1181c241a3c8faa8744288 t/60-features_chunked.t
+SHA1 76d8aea9b0347fd92ff0b5697c4592003a628bfd t/60-features_empty.t
+SHA1 5298442f15b4941a6a5f3325708a706071ac93fc t/61-features_group.t
+SHA1 4b7fe3af081ce2c8811528ec78f5c41f193839e6 t/70-alignment.t
+SHA1 9177f4d319159508ce32d841fadc245a7240717b t/80-structure.t
+SHA1 f53c99fcccdd8817e659f123f32ba8e3a9bf479e t/90-sources.t
+SHA1 2ed2ff7d136e802fb37a491151afb7599ef71bf7 t/FileStub.pm
+SHA1 8e72b851a95ac6fa5c0f029742e94271b58f98a1 t/FileStubChunked.pm
+SHA1 c8bc476a93d0ca69a7739b0a885c64d3c2a31b97 t/FileStubCompat.pm
+SHA1 b8ce1fb7c27e657c734bd93c7446b75659ce3428 t/alignment.xml
+SHA1 bcc696cc5f93712cf4dc53f4d482fb104f022542 t/dna.xml
+SHA1 48b1de5d21eef8ac2df0256e38ae1bbdc337970b t/entry_points-ensembl1834.xml
+SHA1 3b33ba4da52c32fe4c7aa5cb31c43076a65a3875 t/entry_points.xml
+SHA1 e25a2efe3429872e35227a143681e73c366b6736 t/features-empty.xml
+SHA1 c885de7b1b27a7ef87abe113a1532cf9844c4564 t/features-ensembl1834.xml
+SHA1 97737b94ec5ae2122c8f84f857b788398e271aa5 t/features-group.xml
+SHA1 dd01ca4322f625c84fb6150cf6c3e924ee0de149 t/features.xml
+SHA1 4187ecfe701c5fc3014db29977740f4dff991d4b t/sequence-ensembl1834.xml
+SHA1 4394fa0e0c067a3e33b47cb3f1e8ebd62183f711 t/sequence.xml
+SHA1 f4c02d7b9af1d019a4626e8676c7dc57e96662eb t/source.xml
+SHA1 4f44a6a90253e89e8fc12c211e7759cbb911b297 t/structure.xml
+SHA1 e186ead2aab9cf6628921a3c65d467f15f0f913b t/types-ensembl1834.xml
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.10 (Darwin)
+
+iQIcBAEBAgAGBQJLqmiYAAoJEKRiRxpY9zRJFtEQAIaR1q7KzOEErHklOHfYX2ZI
+cq2EQxZnhjAmmN0ae79elI2Y8SiugS5QQzZK5sUOCFCClshIXwXEuyjW6XpffVsj
+JNR659gtjCEJEI/r5PbubryooN0Ulo0Ifg3i+kCe1iq9v9stiLHcRHTrghz7T5Ya
+WGYW3dEayLw4mfVhMqoT+W7tUHvCZuUvr4pFFLyUhLqTd2Tzr4zsDWB61cJp9l1n
+HGw3ENFThbvTObq6Z6lpSi710sWWIqBrI6RkR2EoofuSjPFINdU8TF43vaMwDm5H
+snM9xTYDJG7Yw4ubEgsFUZiWOBkL3W9beEYkPMnuigB4DtELVLXb0zP0v52NEU1C
+x4tUhJrmiBFhEgMRvS6VCmV4WJLF8/Oaitle8cty3eEZV8rDorFD0polV9JAYwe6
+O7vVppk5v14mH3AL6sn1b96soOLJczM9YWo5+7ENehU+V2R4jQR/UL0yFCRHWs0G
+H433BNlN/U4b53T1ER7qrJzbg6pV9gDE9QuYt63MKQwSNyvlTSc6aKISraOCtxO1
+Wl9p2KhTp6qT5z0ajy6ATYvs5Yp2+eCJOgQCWeSZ1FPVThmg8zte4KTFAL3Swi7R
+htGANnF0mr22mz05vhzy927m3f/++gazX7ZU+4M3DviDUEJL312m0u80PlJvBPGz
+vuX13tsw948RZXcX1IK2
+=SXuU
+-----END PGP SIGNATURE-----

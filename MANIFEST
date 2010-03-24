@@ -47,5 +47,7 @@ t/sequence.xml
 t/source.xml
 t/structure.xml
 t/types-ensembl1834.xml
+Build.PL
 Makefile.PL
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml
+SIGNATURE    Added here by Module::Build

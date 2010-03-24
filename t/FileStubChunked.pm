@@ -1,16 +1,16 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
-# Id:            $Id: FileStubChunked.pm,v 1.1 2007/02/20 14:31:54 rmp Exp $
+# Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
+# Id:            $Id: FileStubChunked.pm 19 2010-03-24 19:29:46Z zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/FileStubChunked.pm,v $
-# $HeadURL$
+# $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/FileStubChunked.pm $
 #
 package t::FileStubChunked;
 use strict;
 use warnings;
 use base qw(t::FileStub);
 
-our $VERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 19 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 sub _fetch {
   my ($self, $url_ref, $headers) = @_;

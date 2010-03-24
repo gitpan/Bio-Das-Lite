@@ -1,9 +1,9 @@
 #########
 # Author:        rdf
-# Last Modified: $Date: 2007/02/20 14:31:54 $ $Author: rmp $
-# Id:            $Id: 80-structure.t,v 1.2 2007/02/20 14:31:54 rmp Exp $
+# Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
+# Id:            $Id: 80-structure.t 19 2010-03-24 19:29:46Z zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/80-structure.t,v $
-# $HeadURL$
+# $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/80-structure.t $
 #
 package structure;
 use strict;
@@ -11,7 +11,7 @@ use warnings;
 use Test::More tests => 9;
 use t::FileStub;
 
-our $VERSION  = do { my @r = (q$Revision: 1.2 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 19 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 my $das       = t::FileStub->new({
 				  'dsn'      => 'foo',
