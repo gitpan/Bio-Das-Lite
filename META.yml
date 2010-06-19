@@ -15,14 +15,14 @@ name: Bio-Das-Lite
 provides:
   Bio::Das::Lite:
     file: lib/Bio/Das/Lite.pm
-    version: 2.03
+    version: 2.04
 requires:
   Carp: 1.02
   English: 1.01
   HTTP::Response: 1.49
+  IO::Scalar: 2.110
   Readonly: 1.03
-  SOAP::Lite: 0.69
   WWW::Curl: 4.07
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.03
+version: 2.04

@@ -1,32 +1,28 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
-# Id:            $Id: 05-singledsn.t 19 2010-03-24 19:29:46Z zerojinx $
+# Last Modified: $Date: 2010-04-16 12:33:14 +0100 (Fri, 16 Apr 2010) $ $Author: andyjenkinson $
+# Id:            $Id: 05-singledsn.t 33 2010-04-16 11:33:14Z andyjenkinson $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/05-singledsn.t,v $
 # $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/05-singledsn.t $
 #
 package singledsn;
 use strict;
 use warnings;
-use Test::More tests => 70;
+use Test::More tests => 30;
 use Bio::Das::Lite;
 
-our $VERSION = do { my @r = (q$Revision: 19 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 33 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 $Bio::Das::Lite::DEBUG = 0;
 
-for my $service ('http://das.ensembl.org/das',
-		 'http://das.ensembl.org/das/',
+for my $service ('http://das.sanger.ac.uk/das',
 		 'http://das.ensembl.org/das/dsn',
-		 'http://das.ensembl.org/das/dsn/',
-		 'http://das.ensembl.org/das/dsn/foo',
-		 'http://das.ensembl.org/das/dsn?foo',
 		 'http://das.ensembl.org/das/dsn#foo') {
 
   #########
   # test single dsn from constructor
   #
-  my $das     = Bio::Das::Lite->new({'dsn' => $service});
+  my $das     = Bio::Das::Lite->new({'dsn' => $service, 'timeout' => 10});
   ok(defined $das,                  'new with a single dsn returned something');
   ok(ref($das->dsn()) eq 'ARRAY',   'single service get gave an array ref');
   ok(scalar (@{$das->dsn()}) == 1,  'single service get had length of one');

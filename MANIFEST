@@ -48,6 +48,5 @@ t/source.xml
 t/structure.xml
 t/types-ensembl1834.xml
 Build.PL
-Makefile.PL
 META.yml
 SIGNATURE    Added here by Module::Build

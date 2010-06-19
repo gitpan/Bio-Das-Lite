@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
-# Id:            $Id: 10-multidsn.t 19 2010-03-24 19:29:46Z zerojinx $
+# Last Modified: $Date: 2010-04-16 12:19:36 +0100 (Fri, 16 Apr 2010) $ $Author: andyjenkinson $
+# Id:            $Id: 10-multidsn.t 28 2010-04-16 11:19:36Z andyjenkinson $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/10-multidsn.t,v $
 # $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/10-multidsn.t $
 #
@@ -11,9 +11,9 @@ use warnings;
 use Test::More tests => 10;
 use Bio::Das::Lite;
 
-our $VERSION = do { my @r = (q$Revision: 19 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 28 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 my @services = qw(http://das.ensembl.org/das/dsn http://das.sanger.ac.uk);
-my $das      = Bio::Das::Lite->new({'dsn' => \@services});
+my $das      = Bio::Das::Lite->new({'dsn' => \@services, 'timeout' => 10});
 
 ok(defined $das,                  'new with a multi dsn returned something');
 ok(ref($das->dsn()) eq 'ARRAY',   'multi service get gave an array ref');

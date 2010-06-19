@@ -1,9 +1,9 @@
 #########
 # Author:        rmp
-# Last Modified: $Date$
-# Id:            $Id$
+# Last Modified: $Date: 2010-04-16 12:29:45 +0100 (Fri, 16 Apr 2010) $
+# Id:            $Id: Build.PL 32 2010-04-16 11:29:45Z andyjenkinson $
 # Source:        $Source$
-# $HeadURL$
+# $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/Build.PL $
 #
 use strict;
 use warnings;
@@ -18,7 +18,6 @@ my $builder = Module::Build->new(
 				 requires            => {
 							 'WWW::Curl'         => '4.07',
 							 'HTTP::Response'    => '1.49',
-							 'SOAP::Lite'        => '0.69',
 							 'English'           => '1.01',
 							 'Carp'              => '1.02',
 							 'Readonly'          => '1.03',
@@ -32,7 +31,6 @@ my $builder = Module::Build->new(
 							 'Test::Distribution'      => '2.00',
 							 'Test::Perl::Critic'      => '1.01',
 							},
-				 create_makefile_pl  => 'passthrough',
 				 sign                => 1,
 				);
 

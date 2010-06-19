@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
+# Last Modified: $Date: 2010-06-19 20:57:00 +0100 (Sat, 19 Jun 2010) $ $Author: zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm 19 2010-03-24 19:29:46Z zerojinx $
+# Id:            $Id: Lite.pm 37 2010-06-19 19:57:00Z zerojinx $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -13,16 +13,15 @@ use warnings;
 use WWW::Curl::Multi;
 use WWW::Curl::Easy; # CURLOPT imports
 use HTTP::Response;
-use SOAP::Lite;
 use Carp;
 use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = '2.03';
+our $VERSION  = '2.04';
 Readonly::Scalar our $TIMEOUT         => 5;
 Readonly::Scalar our $REG_TIMEOUT     => 15;
-Readonly::Scalar our $LINKRE          => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>|<link\s+href="([^"]+)"[^>]*?/>}smix; ## no critic (ProhibitComplexRegexes)
+Readonly::Scalar our $LINKRE          => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>|<link\s+href="([^"]+)"[^>]*?/>}smix;
 Readonly::Scalar our $NOTERE          => qr{<note[^>]*>([^<]*)</note>}smix;
 Readonly::Scalar our $DAS_STATUS_TEXT => {
 					  200 => '200 OK',
@@ -318,7 +317,7 @@ sub new {
 	       'timeout'           => $TIMEOUT,
 	       'data'              => {},
 	       'caching'           => 1,
-	       'registry'          => [qw(http://das.sanger.ac.uk/registry/services/das)],
+	       'registry'          => [qw(http://www.dasregistry.org/das)],
 	       '_registry_sources' => [],
 	      };
 
@@ -717,7 +716,7 @@ sub build_requests {
 	}
 
 	if($DEBUG) {
-	  print {*STDERR} qq(invoking _parse_branch for $fname\n); ## no critic (InputOutput::RequireCheckedSyscalls)
+	  print {*STDERR} qq(invoking _parse_branch for $fname\n) or croak $ERRNO;
 	}
 
 	#########
@@ -740,7 +739,7 @@ sub build_requests {
 	}
 
 	if($DEBUG) {
-	  print {*STDERR} qq(completed _parse_branch\n); ## no critic (InputOutput::RequireCheckedSyscalls)
+	  print {*STDERR} qq(completed _parse_branch\n) or croak $ERRNO;
 	}
 
 	return;
@@ -846,21 +845,20 @@ sub _fetch {
     if (scalar @headers) {
         $curl->setopt( CURLOPT_HTTPHEADER, \@headers );
     }
+
     my ($body_ref, $head_ref);
-    CORE::open my $fileb, '>', \$body_ref || croak 'Error opening data handle';
+    open my $fileb, q[>], \$body_ref or croak 'Error opening data handle'; ## no critic (RequireBriefOpen)
     $curl->setopt( CURLOPT_WRITEDATA, $fileb );
 
-    CORE::open my $fileh, '>', \$head_ref || croak 'Error opening header handle';
+    open my $fileh, q[>], \$head_ref or croak 'Error opening header handle'; ## no critic (RequireBriefOpen)
     $curl->setopt( CURLOPT_WRITEHEADER, $fileh );
 
     # we set this so we have the ref later on
     $curl->setopt( CURLOPT_PRIVATE, $i );
     $curl->setopt( CURLOPT_TIMEOUT, $self->timeout || $TIMEOUT );
     #$curl->setopt( CURLOPT_CONNECTTIMEOUT, $self->connection_timeout || 2 );
-    $curl->setopt( CURLOPT_PROXY, $self->http_proxy );
-    $curl->setopt( CURLOPT_PROXYUSERNAME, $self->proxy_user );
-    $curl->setopt( CURLOPT_PROXYPASSWORD, $self->proxy_pass );
-    $curl->setopt( CURLOPT_NOPROXY, join q(,), @{ $self->no_proxy } );
+
+    $self->_fetch_proxy_setup($curl);
 
     $curlm->add_handle($curl);
 
@@ -875,6 +873,45 @@ sub _fetch {
   $DEBUG and print {*STDERR} qq(Requests submitted. Waiting for content\n);
 
   $self->_receive($url_ref, $curlm, \%reqs);
+
+  return;
+}
+
+sub _fetch_proxy_setup {
+  my ($self, $curl) = @_;
+
+  if ( my $proxy = $self->http_proxy ) {
+    if ( defined $Bio::Das::Lite::{CURLOPT_PROXY} ) {
+      $curl->setopt( &CURLOPT_PROXY, $proxy ); ## no critic (ProhibitAmpersandSigils)
+    } else {
+      croak 'Trying to set a proxy, but your version of libcurl does not support this feature';
+    }
+  }
+
+  if ( my $proxy_user = $self->proxy_user ) {
+    if ( defined $Bio::Das::Lite::{CURLOPT_PROXYUSERNAME} ) {
+      $curl->setopt( &CURLOPT_PROXYUSERNAME, $proxy_user ); ## no critic (ProhibitAmpersandSigils)
+    } else {
+      croak 'Trying to set a proxy username, but your version of libcurl does not support this feature';
+    }
+  }
+
+  if ( my $proxy_pass = $self->proxy_pass ) {
+    if ( defined $Bio::Das::Lite::{CURLOPT_PROXYPASSWORD} ) {
+      $curl->setopt( &CURLOPT_PROXYPASSWORD, $proxy_pass ); ## no critic (ProhibitAmpersandSigils)
+    } else {
+      croak 'Trying to set a proxy password, but your version of libcurl does not support this feature';
+    }
+  }
+
+  my @no_proxy = @{ $self->no_proxy };
+  if ( scalar @no_proxy ) {
+    if ( defined $Bio::Das::Lite::{CURLOPT_NOPROXY} ) {
+      $curl->setopt( &CURLOPT_NOPROXY, join q(,), @no_proxy ); ## no critic (ProhibitAmpersandSigils)
+    } else {
+      croak 'Trying to set proxy exclusions, but your version of libcurl does not support this feature';
+    }
+  }
 
   return;
 }
@@ -1089,30 +1126,11 @@ sub registry_sources {
 
   $flush and $self->{'_registry_sources'} = [];
 
-  if(scalar @{$self->{'_registry_sources'}} == 0) {
-    for my $reg (@{$self->registry()}) {
-      $DEBUG and print {*STDERR} qq(Building soap request for $reg\n);
-      my $soap = SOAP::Lite->service("$reg:das_directory?wsdl");
-      $DEBUG and print {*STDERR} qq(Setting soap proxy\n);
-
-      if($self->http_proxy()) {
-	$soap->proxy($reg, proxy => ['http'=>$self->http_proxy()]);
-      }
-
-      $DEBUG and print {*STDERR} qq(Running request for $reg\n);
-
-      local $SIG{ALRM} = sub { croak 'timeout'; };
-      alarm $self->timeout();
-
-      eval {
-	push @{$self->{'_registry_sources'}}, @{$soap->listServices()};
-
-      } or do {
-	carp $EVAL_ERROR;
-      };
-
-      alarm 0;
-    }
+  #########
+  # Populate the list of sources if this is the first call or we're flushing
+  #
+  if (scalar @{$self->{'_registry_sources'}} == 0) {
+    $self->_fetch_registry_sources() or return [];
   }
 
   #########
@@ -1143,6 +1161,158 @@ sub registry_sources {
   }
 
   return $sources;
+}
+
+sub _fetch_registry_sources {
+  my $self     = shift;
+  my $reg_urls = $self->registry();
+
+  if (!scalar @{ $reg_urls }) {
+    return;
+  }
+
+  my $old_dsns     = $self->dsn();
+  my $old_statuses = $self->{'statuscodes'};
+
+  $self->dsn($reg_urls);
+
+  #########
+  # Run the DAS sources command
+  #
+  my $sources_ref = $self->sources();
+  my $statuses    = $self->{'statuscodes'};
+
+  $self->dsn($old_dsns);
+  $self->{'statuscodes'} = $old_statuses;
+
+  for my $url (keys %{ $sources_ref || {} }) {
+    my $status = $statuses->{$url} || 'Unknown status';
+    if ($status !~ m/^200/mxs) {
+      carp "Error fetching sources from '$url' : $status";
+      next;
+    }
+
+    my $ref = $sources_ref->{$url} || [];
+
+    #########
+    # Some basic checks
+    #
+    (ref $ref eq 'ARRAY') || return;
+    $ref = $ref->[0] || {};
+    (ref $ref eq 'HASH') || return;
+    $ref = $ref->{'source'} || [];
+    (ref $ref eq 'ARRAY') || return;
+
+    #########
+    # The sources command has sources (really groups of sources) and
+    # versions (really individual sources). For compatibility with the
+    # old SOAP way of doing things, we must:
+    # 1. throw away this source grouping semantic
+    # 2. convert the hash format to the old style
+    #
+    for my $sourcegroup (@{ $ref }) {
+      $self->_fetch_registry_sources_sourcegroup($sourcegroup);
+    }
+  }
+
+  return 1;
+}
+
+sub _fetch_registry_sources_sourcegroup {
+  my ($self, $sourcegroup) = @_;
+  my $versions = $sourcegroup->{'version'} || [];
+  (ref $versions eq 'ARRAY') || next;
+
+  for my $source (@{ $versions }) {
+    my $caps = $source->{'capability'} || [];
+    my $dsn;
+    my $object = {
+		  capabilities     => [],
+		  coordinateSystem => [],
+		  description      => $sourcegroup->{source_description},
+		  id               => $source->{version_uri},
+		 };
+
+    #########
+    # Some sources have 'more info' URLs
+    #
+    if ( my $doc_href = $sourcegroup->{source_doc_href} ) {
+      $object->{helperurl} = $doc_href;
+    }
+
+    #########
+    # Add the capabilties
+    #
+    for my $cap (@{ $caps }) {
+      #########
+      # Extract the DAS URL from one of the capabilities
+      # NOTE: in DAS 1 we assume all capability query URLs for one
+      #       source are the same. Anything else would need the data
+      #       model to be redesigned.
+      #
+      if (!$dsn) {
+	$dsn = $cap->{'capability_query_uri'} || q();
+	($dsn) = $dsn =~ m{(.+/das\d?/[^/]+)}mxs;
+	$object->{'url'} = $dsn;
+      }
+
+      my $cap_type = $cap->{'capability_type'} || q();
+      ($cap_type)  = $cap_type =~ m/das\d:(.+)/mxs;
+      $cap_type || next;
+
+      push @{ $object->{'capabilities'} }, $cap_type;
+    }
+
+    #########
+    # If none of the capabilities have query URLs, we can't query them!
+    #
+    $object->{'url'} || next;
+
+    #########
+    # Add the coordinates
+    #
+    my $coords = $source->{'coordinates'} || [];
+
+    for my $coord (@{ $coords }) {
+      #########
+      # All coordinates have a name and category
+      #
+      my $coord_ob = {
+		      name      => $coord->{coordinates_authority},
+		      category  => $coord->{coordinates_source},
+		     };
+
+      #########
+      # Some coordinates have a version
+      #
+      if ( my $version = $coord->{'coordinates_version'} ) {
+	$coord_ob->{'version'} = $version;
+      }
+
+      #########
+      # Some coordinates have a species (taxonomy ID and name)
+      #
+      if ( my $taxid = $coord->{'coordinates_taxid'} ) {
+	$coord_ob->{'NCBITaxId'} = $taxid;
+
+	my $desc      = $coord->{'coordinates'};
+	my ($species) = $desc =~ m/([^,]+)$/mxs;
+
+	$coord_ob->{'organismName'} = $species;
+      }
+
+      #########
+      # Add the coordinate system
+      #
+      push @{ $object->{'coordinateSystem'} }, $coord_ob;
+    }
+
+    #########
+    # Add the actual source object
+    #
+    push @{ $self->{'_registry_sources'} }, $object;
+  }
+  return 1;
 }
 
 sub _filter_capability {
@@ -1428,7 +1598,7 @@ Bio::Das::Lite - Perl extension for the DAS (HTTP+XML) Protocol (http://biodas.o
 
 =head2 registry : Get/Set accessor for DAS-Registry service URLs
 
-  $biodaslite->registry('http://das.sanger.ac.uk/registry/das');
+  $biodaslite->registry('http://www.dasregistry.org/das');
 
   my $registry_arrayref = $biodaslite->registry();
 
@@ -1471,8 +1641,6 @@ This module is an implementation of a client for the DAS protocol (XML over HTTP
 =item WWW::Curl
 
 =item HTTP::Response
-
-=item SOAP::Lite
 
 =item Carp
 
