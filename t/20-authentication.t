@@ -3,7 +3,7 @@
 # Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
 # Id:            $Id: 20-authentication.t 19 2010-03-24 19:29:46Z zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/20-authentication.t,v $
-# $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/20-authentication.t $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/t/20-authentication.t $
 #
 package compat_multidsn;
 use strict;

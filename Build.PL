@@ -3,7 +3,7 @@
 # Last Modified: $Date: 2010-04-16 12:29:45 +0100 (Fri, 16 Apr 2010) $
 # Id:            $Id: Build.PL 32 2010-04-16 11:29:45Z andyjenkinson $
 # Source:        $Source$
-# $HeadURL: https://zerojinx@bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/Build.PL $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/Build.PL $
 #
 use strict;
 use warnings;

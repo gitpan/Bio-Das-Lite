@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2010-06-19 20:57:00 +0100 (Sat, 19 Jun 2010) $ $Author: zerojinx $
+# Last Modified: $Date: 2010-11-02 09:58:28 +0000 (Tue, 02 Nov 2010) $ $Author: andyjenkinson $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm 37 2010-06-19 19:57:00Z zerojinx $
+# Id:            $Id: Lite.pm 49 2010-11-02 09:58:28Z andyjenkinson $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -18,7 +18,7 @@ use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = '2.04';
+our $VERSION  = '2.05';
 Readonly::Scalar our $TIMEOUT         => 5;
 Readonly::Scalar our $REG_TIMEOUT     => 15;
 Readonly::Scalar our $LINKRE          => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>|<link\s+href="([^"]+)"[^>]*?/>}smix;
@@ -839,6 +839,7 @@ sub _fetch {
     my $curl = WWW::Curl::Easy->new();
 
     $curl->setopt( CURLOPT_NOPROGRESS, 1 );
+    $curl->setopt( CURLOPT_FOLLOWLOCATION, 1 );
     $curl->setopt( CURLOPT_USERAGENT, $self->user_agent );
     $curl->setopt( CURLOPT_URL, $url );
 
@@ -937,6 +938,12 @@ sub _receive {
         if ($retcode == 0) {
           my $res = HTTP::Response->parse( $head . "\n" . $body );
           my $msg;
+
+          # Workaround for redirects, which result in multiple headers:
+          while ($res->content =~ /^HTTP\/\d+\.\d+\s\d+/mxs) { # check for status line like "HTTP/1.1 200 OK"
+            $res = HTTP::Response->parse( $res->content );
+          }
+
           # Prefer X-DAS-Status
           my ($das_status) = ($res->header('X-DAS-Status') || q()) =~ m/^(\d+)/smx;
           if ($das_status) {
