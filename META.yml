@@ -15,7 +15,7 @@ name: Bio-Das-Lite
 provides:
   Bio::Das::Lite:
     file: lib/Bio/Das/Lite.pm
-    version: 2.05
+    version: 2.10
 requires:
   Carp: 1.02
   English: 1.01
@@ -24,4 +24,4 @@ requires:
   WWW::Curl: 4.07
 resources:
   license: http://dev.perl.org/licenses/
-version: 2.05
+version: 2.10

@@ -14,10 +14,10 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 bbc168d60f948a64c63a942e0ef68126b149f24a Build.PL
-SHA1 adc84739faf27a3af9b7d8a712ed69dc3df5fe91 Changes
+SHA1 35a92c14aeddba3a2eec662c27c8b68a74b572e3 Build.PL
+SHA1 94ac2bbf01541de550d0416beb2d35bb5ea8b124 Changes
 SHA1 640c25e8284118619a4643fc7af9288d0b46b721 MANIFEST
-SHA1 dc75dcb7bac9424adf68f17c83fb448b35ef777e META.yml
+SHA1 0935ee591909a387586a0eaec916a0ceabdd835d META.yml
 SHA1 caba8581f435336284a57040ab22fdc3a2d53379 README
 SHA1 766ee472447381f216f5a8568cb14b31e26c9310 eg/callback_test
 SHA1 8ca2625e70ac5e97e6cb514887bf9001baa2b65a eg/comparison
@@ -26,59 +26,59 @@ SHA1 9e14f1c3fe6abbc1fb690150845a78bc0ba49358 eg/new_from_registry
 SHA1 f0daf11fae56c32d6185f80bd82f74836b1e5c20 eg/regtest
 SHA1 2d197b31031842996e5263b8d8051d0691c140ec eg/stylesheet_test
 SHA1 b3452ef16aa222d32f05f5840d74d7e9661e9bd5 eg/uniprot-test
-SHA1 bd07a188c12654bbae26fb471165e774a8545409 lib/Bio/Das/Lite.pm
-SHA1 4bd9c725b10f219fcb5e3df7b9dd56587ea2b98d t/00-critic.t
-SHA1 25c12484e4501968de98f896842c92d163fdc774 t/00-distribution.t
+SHA1 3c9de8d9c53f678008af76b2f7d2b8fa9f653b98 lib/Bio/Das/Lite.pm
+SHA1 ac238b655644d7bca113006844d0e3555656c661 t/00-critic.t
+SHA1 4f35a0b06f28fb4c13347dc398e354afe048a987 t/00-distribution.t
 SHA1 8b6d86483f31129f7c64269838d44dfa46cb8bae t/00-pod.t
 SHA1 d27d6c01dee353ae57e633eb20679804432bbbfc t/00-podcoverage.t
-SHA1 0b4d889a2fbac534741875bacc87a3fc1389c1bf t/01-general.t
-SHA1 0a31a129300c78d7f9b517af0eb9d30e870ea5f0 t/02-statuscodes.t
-SHA1 1f5d6366679f7a0866a4618935b08c9388248283 t/05-singledsn.t
-SHA1 9fce6de1fafc87c42a910214c9ea655deaf82c6a t/06-singledsn-singleseg.t
-SHA1 fb6cdf0dd2e84ebe57e9dd8739e93cbc589e9d9b t/07-singledsn-multiseg.t
-SHA1 49a6c025ea595ca9bc6dbe04a995a8eeea279194 t/10-multidsn.t
-SHA1 f08ddf5c33752f8aa1bbfba3583f56dd4ed944f5 t/20-authentication.t
+SHA1 14128b21a4e57ff9dfa874ba53427dd24147baee t/01-general.t
+SHA1 f0f12a3084c4899e140cc51bf3ebebb32388a9ec t/02-statuscodes.t
+SHA1 2a44b7bccf5eabbc8030372ef7f6c76ddc35f667 t/05-singledsn.t
+SHA1 7d4d4c6171f94633fba653699a01147e441ac1f8 t/06-singledsn-singleseg.t
+SHA1 d17fadc687f08f3dadf264bb447e695af810500e t/07-singledsn-multiseg.t
+SHA1 268b8af1294929eada5a2eeacc520b2bc742155e t/10-multidsn.t
+SHA1 41dc679648237ab3b8182fdf1824bee8a69bf57e t/20-authentication.t
 SHA1 0b90803d53dd26b893701fe4a4a63cde051c31f4 t/21-proxy.t
-SHA1 1914adecfae8aff0b62ceca020a18e402bb446ba t/40-dna.t
-SHA1 98cdc8bbebc789e9c07220cf0b8a9a645df05ef5 t/45-sequence.t
-SHA1 63638fa3460207cb97ce42d0047415689e7d8cb6 t/50-entry_points.t
-SHA1 3ac639029c37134aab4b1653acd50e40dd39316d t/60-features.t
-SHA1 93aa9ca25759502943bd4231d01ce4b5f881ef4f t/60-features_chunked.t
-SHA1 f49070368075a8dcaecace0a084972428cb5a1c8 t/60-features_empty.t
-SHA1 34ffe45a4bcf5cf6d10fc1f65618d35e95357836 t/61-features_group.t
-SHA1 a274a5f35add415e2028be74ef8ff83007395908 t/70-alignment.t
-SHA1 4276afef5f06f51ad0ffe6baac099e8266b567e4 t/80-structure.t
-SHA1 399bf0ba62d3bcc0bc513228c86e269bf87d7e28 t/90-sources.t
-SHA1 bde128370e1f5a0e0ba218894294e3298ee1b32b t/FileStub.pm
-SHA1 32781e163e72529b40e59367087d5cf53d48fcec t/FileStubChunked.pm
-SHA1 bfb2187eac5dc438ff114ff5d8825ebe06d3ecbd t/FileStubCompat.pm
+SHA1 7c35d02aeb9d0785f853d4e82c0ab92b468de687 t/40-dna.t
+SHA1 eeebd7c8cd8ecfe761040e847e3f4f3bf288f5ba t/45-sequence.t
+SHA1 7ce1281c333ec6417c09f5cf1838c31caaec551b t/50-entry_points.t
+SHA1 53f5c5f0bc34f8658dcc1287f932de9cb4de2cdf t/60-features.t
+SHA1 2bbce652e32bc5a6bb3e464937c502f7b866085a t/60-features_chunked.t
+SHA1 46aa78c0c08085ce2d89d2486277b7a57df66eca t/60-features_empty.t
+SHA1 f2f5bdc4ab4387f13883be5d0679dd2e48ecc180 t/61-features_group.t
+SHA1 d1b6580e0abbec5e27eb0a83810e84bc82088d25 t/70-alignment.t
+SHA1 e5c1a677120f8f924f4eb381515837e8c7e5a057 t/80-structure.t
+SHA1 fc0bc148b1b368127a8a508a06fd54b1e00b9830 t/90-sources.t
+SHA1 e029a59df52ab4eccfa23134766050d3cb98ec8d t/FileStub.pm
+SHA1 55b335e242af353bc1ca10f4c6546112251237a5 t/FileStubChunked.pm
+SHA1 e28cb4b2abce00f1be26e3f486863766e199e45c t/FileStubCompat.pm
 SHA1 b8ce1fb7c27e657c734bd93c7446b75659ce3428 t/alignment.xml
 SHA1 bcc696cc5f93712cf4dc53f4d482fb104f022542 t/dna.xml
 SHA1 48b1de5d21eef8ac2df0256e38ae1bbdc337970b t/entry_points-ensembl1834.xml
 SHA1 3b33ba4da52c32fe4c7aa5cb31c43076a65a3875 t/entry_points.xml
 SHA1 e25a2efe3429872e35227a143681e73c366b6736 t/features-empty.xml
 SHA1 c885de7b1b27a7ef87abe113a1532cf9844c4564 t/features-ensembl1834.xml
-SHA1 97737b94ec5ae2122c8f84f857b788398e271aa5 t/features-group.xml
+SHA1 593765a2a243c2d63374422f3d9094983ef9cc4d t/features-group.xml
 SHA1 dd01ca4322f625c84fb6150cf6c3e924ee0de149 t/features.xml
-SHA1 4187ecfe701c5fc3014db29977740f4dff991d4b t/sequence-ensembl1834.xml
-SHA1 4394fa0e0c067a3e33b47cb3f1e8ebd62183f711 t/sequence.xml
+SHA1 ca5b4e2fe6c2d04db55702a1f755596f4f0a0a1d t/sequence-ensembl1834.xml
+SHA1 fd7f4c8cd09f86c71a2e33854a02c9a426a57ec2 t/sequence.xml
 SHA1 f4c02d7b9af1d019a4626e8676c7dc57e96662eb t/source.xml
 SHA1 4f44a6a90253e89e8fc12c211e7759cbb911b297 t/structure.xml
 SHA1 e186ead2aab9cf6628921a3c65d467f15f0f913b t/types-ensembl1834.xml
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iQIcBAEBAgAGBQJMz+/iAAoJEPG6pZARLr4FD64P/2Peeia1yv6aVNdaWLx7KXSa
-ZcbGYpEHB1dBHMD5mty4GbkZ8NgbAPRb6dZya3pxl/bhD5NOTX1hi6fBT9eJhP1p
-Zt2Ka9QfAv9PLYSZPOV9q6RKrC9xCa462Knh4KBD7Vq6f9sOCSV/VuDo2mVTYR5+
-+uSCOHWuVCqwJ44MHxb002m8APfuOm2rpKXAcbYqIYLODguSbhR5yAH9DJgZPB0H
-a/kFVB7aMih/MfFXXhxKVTMDSczhrjJkgBAHx+ZimyiRDRdeWnfOaBe9ZsBeLbXv
-moYMM5korsoxu7uTUqpFcn7l9YXXbl4rhcvjwKrft33cz+gMQwpggmj8wd5WcfYj
-1siiZHjt8rec3VyPTwF9AynHKS1AeMf3spWIeYIlmBCZDpNkXpaMQeGBzMFdxEve
-wFHECShu+0vDoHTi8TAMQiwu7Sh6LRVnsJma03UkZJjVl5eumhL0M43r6JpXC0GI
-nhtM7sAkmUcfpaGEKfjCb8v784PmQAHZNj7AQPOM6iMO0uStGFkNbYopN63Ik/2Z
-SDd9RrIXhlVswb+qiBxzh1DLGKrZO8cpvkrMQdvWytJI2+gSgoEMYnhVYGP666bs
-kL7NVnDXsTOL7AThVo/qZpa47yraF6qzQLQGG6n4vCa/vWE1a/CtWC3ZMV3CWd2n
-YAXH76Ok9vhEH8ypdtg+
-=oRNF
+iQIcBAEBAgAGBQJMz/EhAAoJEPG6pZARLr4Frb4QAL2BGyCiIikuXDop0Phd/hHg
+0Usok+/HLtFhdr+elYALED1et3H55FvA2CDCFvb79UTKRh13eOp+5osk+YcfjTa5
+3N/meRYEKZLzNr7x7CcE5mlG6h7KxWpdwrRefDj0mYokXdUnrLo41WdrQrZxwsq0
+c0XidV4WnEYa86qlWssYfmx8niJ4RzonfkYh1XNXVH7lfdHQw31f51/UAB4rNtwq
+JGGdlAjq0IWkijz2btj59mf98C05xWnNEDcUdARstQSYXts+B+0pLpwE2Zawt28L
+mg+iGyVmvAqvvOdLLsWHMgLpKdPsnOQ6Uzl8GcJQJWYTNyFe+BPZj2Y3+5sMgynp
+ov8Ceqcivjq8brVX2km6jpO8G2N0lJWUHCKOsYZGi/SQKiToLDLEpx6yhEpSGkRw
+EqTFwav7qnmckJ5BCvi+b1x7LId9fvGZRezj4JXIbP6RJQyRvcbKys09Gq+RkPd9
+nLXsGw0pJ3TNsdQG/I3WhJ44dPl+yQ1mHCfQDmNYgI/Yu93jOPOwSMk7g6vzK0Am
+oFjfFv3y/Xf64ssjenyh5BvHq9OSaYTgl34xp5XtXZyTFcPRNNO2WGSWoEfTG9aA
+CYiZ3jbYVxmECj2ld975BUSThVVUyzj29ywSDNorL9XBFeYVItDeAim3l4oPE90W
+osb+bkFjehNbbXgWD3pc
+=YndJ
 -----END PGP SIGNATURE-----

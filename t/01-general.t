@@ -3,7 +3,7 @@
 # Last Modified: $Date: 2010-11-02 09:50:49 +0000 (Tue, 02 Nov 2010) $ $Author: andyjenkinson $
 # Id:            $Id: 01-general.t 45 2010-11-02 09:50:49Z andyjenkinson $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/01-general.t,v $
-# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/t/01-general.t $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/01-general.t $
 #
 package general;
 use strict;

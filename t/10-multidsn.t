@@ -3,7 +3,7 @@
 # Last Modified: $Date: 2010-09-22 17:47:07 +0100 (Wed, 22 Sep 2010) $ $Author: andyjenkinson $
 # Id:            $Id: 10-multidsn.t 43 2010-09-22 16:47:07Z andyjenkinson $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/10-multidsn.t,v $
-# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/t/10-multidsn.t $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/10-multidsn.t $
 #
 package multidsn;
 use strict;

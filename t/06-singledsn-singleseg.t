@@ -3,7 +3,7 @@
 # Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
 # Id:            $Id: 06-singledsn-singleseg.t 19 2010-03-24 19:29:46Z zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/06-singledsn-singleseg.t,v $
-# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/t/06-singledsn-singleseg.t $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/06-singledsn-singleseg.t $
 #
 package singledsn_singleseg;
 use Test::More tests => 13;

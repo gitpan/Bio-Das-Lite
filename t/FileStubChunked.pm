@@ -3,7 +3,7 @@
 # Last Modified: $Date: 2010-03-24 19:29:46 +0000 (Wed, 24 Mar 2010) $ $Author: zerojinx $
 # Id:            $Id: FileStubChunked.pm 19 2010-03-24 19:29:46Z zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/FileStubChunked.pm,v $
-# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/t/FileStubChunked.pm $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/FileStubChunked.pm $
 #
 package t::FileStubChunked;
 use strict;

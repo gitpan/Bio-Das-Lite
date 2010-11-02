@@ -1,9 +1,9 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2010-04-16 12:29:45 +0100 (Fri, 16 Apr 2010) $
-# Id:            $Id: Build.PL 32 2010-04-16 11:29:45Z andyjenkinson $
+# Last Modified: $Date: 2010-11-02 09:54:35 +0000 (Tue, 02 Nov 2010) $
+# Id:            $Id: Build.PL 47 2010-11-02 09:54:35Z andyjenkinson $
 # Source:        $Source$
-# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/tags/spec-1.53/Build.PL $
+# $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/Build.PL $
 #
 use strict;
 use warnings;
