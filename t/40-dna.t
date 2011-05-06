@@ -1,7 +1,7 @@
 #########
 # Author:        rmp
-# Last Modified: $Date: 2010-11-02 09:54:35 +0000 (Tue, 02 Nov 2010) $ $Author: andyjenkinson $
-# Id:            $Id: 40-dna.t 47 2010-11-02 09:54:35Z andyjenkinson $
+# Last Modified: $Date: 2011-05-06 11:18:40 +0100 (Fri, 06 May 2011) $ $Author: zerojinx $
+# Id:            $Id: 40-dna.t 53 2011-05-06 10:18:40Z zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/t/40-dna.t,v $
 # $HeadURL: https://bio-das-lite.svn.sourceforge.net/svnroot/bio-das-lite/trunk/t/40-dna.t $
 #
@@ -11,11 +11,11 @@ use warnings;
 use Test::More tests => 1;
 use t::FileStub;
 
-our $VERSION = do { my @r = (q$Revision: 47 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 53 $ =~ /\d+/mxg); sprintf '%d.'.'%03d' x $#r, @r };
 
 my $das      = t::FileStub->new({
 				 'dsn'      => 'foo',
-				 'filedata' => 't/dna.xml',
+				 'filedata' => 't/data/dna.xml',
 				});
 
 my $result   = $das->dna();

@@ -2,9 +2,9 @@
 # Author:        rpettett@cpan.org
 # Maintainer:    rpettett@cpan.org
 # Created:       2005-08-23
-# Last Modified: $Date: 2010-11-02 09:56:37 +0000 (Tue, 02 Nov 2010) $ $Author: andyjenkinson $
+# Last Modified: $Date: 2011-05-06 11:18:40 +0100 (Fri, 06 May 2011) $ $Author: zerojinx $
 # Source:        $Source: /var/lib/cvsd/cvsroot/Bio-DasLite/Bio-DasLite/lib/Bio/Das/Lite.pm,v $
-# Id:            $Id: Lite.pm 48 2010-11-02 09:56:37Z andyjenkinson $
+# Id:            $Id: Lite.pm 53 2011-05-06 10:18:40Z zerojinx $
 # $HeadURL $
 #
 package Bio::Das::Lite;
@@ -18,7 +18,7 @@ use English qw(-no_match_vars);
 use Readonly;
 
 our $DEBUG    = 0;
-our $VERSION  = '2.10';
+our $VERSION  = '2.11';
 Readonly::Scalar our $TIMEOUT         => 5;
 Readonly::Scalar our $REG_TIMEOUT     => 15;
 Readonly::Scalar our $LINKRE          => qr{<link\s+href="([^"]+)"[^>]*?>([^<]*)</link>|<link\s+href="([^"]+)"[^>]*?/>}smix;
@@ -1021,7 +1021,7 @@ sub _parse_branch {
     my $opts = $attr->{$tag}||[];
 
     for my $a (@{$opts}) {
-      ($tmp)              = $blk =~ m{<$tag[^>]+$a="([^"]+?)"}smix;
+      ($tmp)              = $blk =~ m{<$tag[^>]*\s+$a="([^"]+?)"}smix;
       if(defined $tmp) {
 	$ref->{"${tag}_$a"} = $tmp;
       }
